@@ -47,47 +47,274 @@ st.markdown(
     """
     <style>
     .stApp {
-        background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 45%, #f8fafc 100%);
+        background:
+            radial-gradient(circle at top left, rgba(132,204,22,0.18), transparent 28%),
+            radial-gradient(circle at top right, rgba(34,197,94,0.14), transparent 25%),
+            linear-gradient(135deg, #fafaf5 0%, #f7f8f0 55%, #eef7e8 100%);
     }
 
     .block-container {
-        padding-top: 2rem;
+        padding-top: 1.4rem;
         padding-bottom: 3rem;
-        max-width: 1450px;
+        max-width: 1480px;
     }
 
-    .hero {
-        background: linear-gradient(135deg, #0f172a, #1e3a8a);
-        padding: 55px 60px;
-        border-radius: 28px;
-        color: white;
-        box-shadow: 0 22px 55px rgba(15,23,42,0.25);
-        margin-top: 20px;
-        margin-bottom: 35px;
+    section[data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #fafaf5 0%, #f1f5e8 100%);
+        border-right: 1px solid rgba(63,98,18,0.12);
     }
 
-    .hero h1 {
-        font-size: 3.2rem;
+    section[data-testid="stSidebar"] h1,
+    section[data-testid="stSidebar"] h2,
+    section[data-testid="stSidebar"] h3 {
+        color: #1f2937 !important;
+    }
+
+    .top-nav {
+        background: rgba(255,255,255,0.86);
+        border: 1px solid rgba(100,116,139,0.18);
+        border-radius: 22px;
+        padding: 14px 22px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 12px 30px rgba(15,23,42,0.06);
+        margin-bottom: 12px;
+    }
+
+    .brand-wrap {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .brand-logo {
+        width: 46px;
+        height: 46px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #3f7d20, #84cc16);
+        box-shadow: 0 8px 20px rgba(63,125,32,0.25);
+    }
+
+    .brand-name {
+        font-size: 1.25rem;
         font-weight: 900;
-        margin-bottom: 10px;
-        letter-spacing: -0.04em;
+        color: #111827;
     }
 
-    .hero p {
-        font-size: 1.15rem;
-        color: #dbeafe;
-        max-width: 900px;
-        line-height: 1.55;
-    }
-
-    .badge {
+    .nav-pill {
         display: inline-block;
-        padding: 7px 13px;
-        border-radius: 999px;
-        background: rgba(59,130,246,0.18);
-        color: #bfdbfe;
+        padding: 10px 18px;
+        border-radius: 14px;
+        border: 1px solid rgba(100,116,139,0.22);
+        color: #111827;
         font-weight: 700;
+        margin-left: 6px;
+        background: rgba(255,255,255,0.72);
+    }
+
+    .ticker-strip {
+        background: rgba(255,255,255,0.86);
+        border: 1px solid rgba(100,116,139,0.14);
+        border-radius: 18px;
+        padding: 10px 18px;
+        margin-bottom: 26px;
+        box-shadow: 0 8px 24px rgba(15,23,42,0.05);
+        white-space: nowrap;
+        overflow: hidden;
+    }
+
+    .ticker-label {
+        color: #64748b;
+        font-weight: 800;
+        margin-right: 18px;
+    }
+
+    .ticker-item {
+        color: #111827;
+        font-weight: 800;
+        margin-right: 24px;
+    }
+
+    .up {
+        background: #e7f4d8;
+        color: #3f7d20;
+        padding: 3px 9px;
+        border-radius: 999px;
+        margin-left: 5px;
+    }
+
+    .down {
+        background: #fee2e2;
+        color: #dc2626;
+        padding: 3px 9px;
+        border-radius: 999px;
+        margin-left: 5px;
+    }
+
+    .welcome-title {
+        font-size: 2.15rem;
+        font-weight: 950;
+        color: #111827;
+        letter-spacing: -0.04em;
+        margin-bottom: 4px;
+    }
+
+    .welcome-subtitle {
+        color: #4b5563;
+        font-size: 1.05rem;
+        margin-bottom: 22px;
+    }
+
+    .kpi-card {
+        background: rgba(255,255,255,0.9);
+        border: 1px solid rgba(100,116,139,0.16);
+        border-radius: 22px;
+        padding: 24px 26px;
+        box-shadow: 0 10px 28px rgba(15,23,42,0.06);
+        min-height: 145px;
+    }
+
+    .kpi-label {
+        color: #4b5563;
+        font-weight: 800;
+        font-size: 1rem;
+        margin-bottom: 12px;
+    }
+
+    .kpi-value {
+        color: #111827;
+        font-size: 2rem;
+        font-weight: 950;
+        letter-spacing: -0.03em;
+    }
+
+    .kpi-note-green {
+        display: inline-block;
+        background: #e7f4d8;
+        color: #3f7d20;
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-weight: 800;
+        margin-top: 8px;
+    }
+
+    .kpi-note-red {
+        display: inline-block;
+        background: #fee2e2;
+        color: #dc2626;
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-weight: 800;
+        margin-top: 8px;
+    }
+
+    .panel {
+        background: rgba(255,255,255,0.92);
+        border: 1px solid rgba(100,116,139,0.16);
+        border-radius: 24px;
+        padding: 26px;
+        box-shadow: 0 12px 32px rgba(15,23,42,0.07);
+        margin-bottom: 22px;
+    }
+
+    .panel-title {
+        font-size: 1.35rem;
+        font-weight: 950;
+        color: #111827;
+        margin-bottom: 14px;
+    }
+
+    .mini-card {
+        background: #f5f5ed;
+        border-radius: 16px;
+        padding: 18px;
+        border: 1px solid rgba(100,116,139,0.10);
+    }
+
+    .mini-title {
+        font-weight: 900;
+        color: #111827;
+        font-size: 1rem;
+    }
+
+    .mini-sub {
+        color: #6b7280;
+        margin-top: 4px;
+    }
+
+    .buy-pill {
+        display: inline-block;
+        background: #e7f4d8;
+        color: #3f7d20;
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-weight: 900;
+        margin-top: 10px;
+    }
+
+    .sell-pill {
+        display: inline-block;
+        background: #fee2e2;
+        color: #dc2626;
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-weight: 900;
+        margin-top: 10px;
+    }
+
+    .news-row {
+        border-bottom: 1px solid rgba(100,116,139,0.18);
+        padding: 14px 0;
+    }
+
+    .news-dot-green {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        background: #3f7d20;
+        border-radius: 50%;
+        margin-right: 12px;
+    }
+
+    .news-dot-red {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        background: #ef4444;
+        border-radius: 50%;
+        margin-right: 12px;
+    }
+
+    .news-title {
+        font-size: 1.05rem;
+        font-weight: 850;
+        color: #111827;
+    }
+
+    .news-source {
+        color: #6b7280;
+        font-weight: 700;
+        margin-left: 24px;
+    }
+
+    .quick-trade {
+        background: rgba(255,255,255,0.92);
+        border: 1px solid rgba(100,116,139,0.16);
+        border-radius: 24px;
+        padding: 26px;
+        box-shadow: 0 12px 32px rgba(15,23,42,0.07);
+    }
+
+    .quick-button {
+        background: #e7f4d8;
+        color: #3f7d20;
+        text-align: center;
+        border-radius: 14px;
+        padding: 12px;
+        font-weight: 950;
         margin-bottom: 18px;
+        font-size: 1.2rem;
     }
 
     .feature-card {
@@ -141,106 +368,219 @@ if "logged_in" not in st.session_state:
 
 
 # =============================
-# Landing page
+# Premium landing page
 # =============================
 st.markdown(
     """
-    <div class="hero">
-        <div class="badge">Python · Streamlit · Quant Finance · Risk Analytics</div>
-        <h1>Quant Trading & Risk Platform</h1>
-        <p>
-        A full-stack quantitative trading dashboard for backtesting, simulated trading,
-        risk monitoring, Monte Carlo forecasting, portfolio optimization, strategy analysis,
-        execution simulation, counterfactual replay, and alert generation.
-        </p>
+    <div class="top-nav">
+        <div class="brand-wrap">
+            <div class="brand-logo"></div>
+            <div class="brand-name">TradePro Quant</div>
+        </div>
+        <div>
+            <span class="nav-pill">Dashboard</span>
+            <span class="nav-pill">Markets</span>
+            <span class="nav-pill">Portfolio</span>
+            <span class="nav-pill">Screener</span>
+            <span class="nav-pill">News</span>
+        </div>
+    </div>
+
+    <div class="ticker-strip">
+        <span class="ticker-label">⌁ Live</span>
+        <span class="ticker-item">SPY $526 <span class="up">+0.42%</span></span>
+        <span class="ticker-item">QQQ $451 <span class="up">+0.68%</span></span>
+        <span class="ticker-item">NVDA $948 <span class="up">+1.14%</span></span>
+        <span class="ticker-item">TSLA $173 <span class="down">-0.76%</span></span>
+        <span class="ticker-item">AAPL $190 <span class="up">+0.31%</span></span>
     </div>
     """,
     unsafe_allow_html=True
 )
 
-c1, c2, c3 = st.columns(3)
+username_display = st.session_state.username if st.session_state.logged_in else "Trader"
 
-with c1:
+st.markdown(
+    f"""
+    <div class="welcome-title">Good morning, {username_display}</div>
+    <div class="welcome-subtitle">Friday, 15 May 2026 · Markets open · Quant research workspace active</div>
+    """,
+    unsafe_allow_html=True
+)
+
+m1, m2, m3, m4 = st.columns(4)
+
+with m1:
     st.markdown(
         """
-        <div class="feature-card">
-            <div class="feature-title">📈 Backtesting Engine</div>
-            <div class="feature-text">
-            Test factor strategies using momentum, value, profitability, transaction costs, and rebalance rules.
+        <div class="kpi-card">
+            <div class="kpi-label">Portfolio value</div>
+            <div class="kpi-value">$421,800</div>
+            <div class="kpi-note-green">↗ +2.1% today</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+with m2:
+    st.markdown(
+        """
+        <div class="kpi-card">
+            <div class="kpi-label">Day P&L</div>
+            <div class="kpi-value" style="color:#3f7d20;">+$8,340</div>
+            <div class="kpi-note-green">Realised + open</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+with m3:
+    st.markdown(
+        """
+        <div class="kpi-card">
+            <div class="kpi-label">Open positions</div>
+            <div class="kpi-value">7</div>
+            <div class="kpi-note-green">3 in profit · 4 open</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+with m4:
+    st.markdown(
+        """
+        <div class="kpi-card">
+            <div class="kpi-label">Win rate</div>
+            <div class="kpi-value">68%</div>
+            <div class="kpi-note-green">↗ +4% vs last month</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+left, right = st.columns([2.2, 1])
+
+with left:
+    st.markdown(
+        """
+        <div class="panel">
+            <div class="panel-title">Portfolio performance</div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    perf_df = pd.DataFrame({
+        "Equity": [400000, 403000, 401800, 407500, 409000, 415000, 421800]
+    }, index=["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"])
+
+    st.line_chart(perf_df)
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    st.markdown(
+        """
+        <div class="panel">
+            <div class="panel-title">Daily picks</div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    p1, p2, p3 = st.columns(3)
+
+    with p1:
+        st.markdown(
+            """
+            <div class="mini-card">
+                <div class="mini-title">NVDA</div>
+                <div class="mini-sub">Target $990</div>
+                <div class="buy-pill">Buy</div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    with p2:
+        st.markdown(
+            """
+            <div class="mini-card">
+                <div class="mini-title">MSFT</div>
+                <div class="mini-sub">Target $440</div>
+                <div class="buy-pill">Buy</div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    with p3:
+        st.markdown(
+            """
+            <div class="mini-card">
+                <div class="mini-title">TSLA</div>
+                <div class="mini-sub">SL $165</div>
+                <div class="sell-pill">Sell</div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    st.markdown(
+        """
+        <div class="panel">
+            <div class="panel-title">Market news</div>
+
+            <div class="news-row">
+                <span class="news-dot-green"></span>
+                <span class="news-title">Fed signals cautious optimism as inflation cools</span>
+                <div class="news-source">Reuters · 2h ago</div>
+            </div>
+
+            <div class="news-row">
+                <span class="news-dot-red"></span>
+                <span class="news-title">Nasdaq slips intraday as mega-cap tech consolidates</span>
+                <div class="news-source">MarketWatch · 3h ago</div>
+            </div>
+
+            <div class="news-row">
+                <span class="news-dot-green"></span>
+                <span class="news-title">Semiconductor earnings beat estimates; AI demand remains strong</span>
+                <div class="news-source">Bloomberg · 5h ago</div>
             </div>
         </div>
         """,
         unsafe_allow_html=True
     )
 
-with c2:
+with right:
     st.markdown(
         """
-        <div class="feature-card">
-            <div class="feature-title">🛡️ Risk Engine</div>
-            <div class="feature-text">
-            Monitor drawdown, volatility, Sharpe ratio, worst-period loss, and kill-switch status.
-            </div>
+        <div class="panel">
+            <div class="panel-title">Watchlist</div>
+            <div class="news-row"><span class="news-title">SPY</span><div class="news-source">ETF</div></div>
+            <div class="news-row"><span class="news-title">NVDA</span><div class="news-source">NASDAQ</div></div>
+            <div class="news-row"><span class="news-title">AAPL</span><div class="news-source">NASDAQ</div></div>
+            <div class="news-row"><span class="news-title">MSFT</span><div class="news-source">NASDAQ</div></div>
+            <div class="news-row"><span class="news-title">QQQ</span><div class="news-source">ETF</div></div>
         </div>
         """,
         unsafe_allow_html=True
     )
 
-with c3:
     st.markdown(
         """
-        <div class="feature-card">
-            <div class="feature-title">🎲 Monte Carlo Simulation</div>
-            <div class="feature-text">
-            Forecast possible portfolio outcomes and estimate downside risk using historical return behavior.
-            </div>
+        <div class="quick-trade">
+            <div class="panel-title">Quick trade</div>
+            <div class="quick-button">Buy</div>
         </div>
         """,
         unsafe_allow_html=True
     )
 
-st.write("")
+    qt_symbol = st.text_input("Symbol", placeholder="e.g. AAPL")
+    qt_qty = st.number_input("Quantity", min_value=0, value=0, step=1)
 
-c4, c5, c6 = st.columns(3)
-
-with c4:
-    st.markdown(
-        """
-        <div class="feature-card">
-            <div class="feature-title">⚡ Execution Engine</div>
-            <div class="feature-text">
-            Simulate TWAP, VWAP, immediate, and adaptive execution with slippage and market impact.
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-with c5:
-    st.markdown(
-        """
-        <div class="feature-card">
-            <div class="feature-title">🧬 Strategy DNA</div>
-            <div class="feature-text">
-            Analyze how strategies behave across bull, bear, high-volatility, and low-volatility regimes.
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-with c6:
-    st.markdown(
-        """
-        <div class="feature-card">
-            <div class="feature-title">📊 Portfolio Optimizer</div>
-            <div class="feature-text">
-            Build optimized portfolios using max Sharpe, minimum volatility, equal weight, and risk parity methods.
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    st.button("Place demo order", use_container_width=True)
 
 st.divider()
 
