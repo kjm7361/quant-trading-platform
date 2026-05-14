@@ -7,13 +7,12 @@ import matplotlib.pyplot as plt
 import yfinance as yf
 from reports.report import build_html_report
 
-
 from signals.momentum import momentum_signal
 from signals.value import value_signal
 from signals.profitability import profitability_signal
 
 from portfolio.positions import generate_positions
-from portfolio.rebalance import get_rebalance_dates, apply_rebalance_rule  
+from portfolio.rebalance import get_rebalance_dates, apply_rebalance_rule
 
 from backtest.returns import compute_returns
 from backtest.costs import apply_transaction_costs
@@ -30,11 +29,6 @@ from portfolio.blotter import holdings_snapshot, trade_blotter
 from utils.exports import df_to_csv_bytes, series_to_csv_bytes
 
 
-
-
-
-
-
 # =============================
 # Helper: composite signal
 # =============================
@@ -47,7 +41,93 @@ def build_composite_signal(signal_list):
 # =============================
 # Streamlit setup
 # =============================
-st.set_page_config(page_title="Quant Research Platform", layout="wide")
+st.set_page_config(page_title="Quant Trading Platform", layout="wide")
+
+st.markdown(
+    """
+    <style>
+    .stApp {
+        background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 45%, #f8fafc 100%);
+    }
+
+    .block-container {
+        padding-top: 2rem;
+        padding-bottom: 3rem;
+        max-width: 1450px;
+    }
+
+    .hero {
+        background: linear-gradient(135deg, #0f172a, #1e3a8a);
+        padding: 55px 60px;
+        border-radius: 28px;
+        color: white;
+        box-shadow: 0 22px 55px rgba(15,23,42,0.25);
+        margin-top: 20px;
+        margin-bottom: 35px;
+    }
+
+    .hero h1 {
+        font-size: 3.2rem;
+        font-weight: 900;
+        margin-bottom: 10px;
+        letter-spacing: -0.04em;
+    }
+
+    .hero p {
+        font-size: 1.15rem;
+        color: #dbeafe;
+        max-width: 900px;
+        line-height: 1.55;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 7px 13px;
+        border-radius: 999px;
+        background: rgba(59,130,246,0.18);
+        color: #bfdbfe;
+        font-weight: 700;
+        margin-bottom: 18px;
+    }
+
+    .feature-card {
+        background: rgba(255,255,255,0.9);
+        padding: 24px;
+        border-radius: 22px;
+        box-shadow: 0 10px 28px rgba(15,23,42,0.08);
+        border: 1px solid rgba(148,163,184,0.25);
+        min-height: 160px;
+    }
+
+    .feature-title {
+        font-size: 1.12rem;
+        font-weight: 800;
+        color: #111827;
+        margin-bottom: 8px;
+    }
+
+    .feature-text {
+        color: #64748b;
+        font-size: 0.95rem;
+        line-height: 1.45;
+    }
+
+    [data-testid="stMetric"] {
+        background: rgba(255,255,255,0.9);
+        border: 1px solid rgba(148,163,184,0.25);
+        padding: 18px 20px;
+        border-radius: 18px;
+        box-shadow: 0 8px 22px rgba(15,23,42,0.06);
+    }
+
+    [data-testid="stMetricValue"] {
+        font-size: 1.55rem;
+        font-weight: 800;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 
 # =============================
@@ -59,7 +139,115 @@ if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
     st.session_state.username = None
 
+
+# =============================
+# Landing page
+# =============================
+st.markdown(
+    """
+    <div class="hero">
+        <div class="badge">Python · Streamlit · Quant Finance · Risk Analytics</div>
+        <h1>Quant Trading & Risk Platform</h1>
+        <p>
+        A full-stack quantitative trading dashboard for backtesting, simulated trading,
+        risk monitoring, Monte Carlo forecasting, portfolio optimization, strategy analysis,
+        execution simulation, counterfactual replay, and alert generation.
+        </p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+c1, c2, c3 = st.columns(3)
+
+with c1:
+    st.markdown(
+        """
+        <div class="feature-card">
+            <div class="feature-title">📈 Backtesting Engine</div>
+            <div class="feature-text">
+            Test factor strategies using momentum, value, profitability, transaction costs, and rebalance rules.
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+with c2:
+    st.markdown(
+        """
+        <div class="feature-card">
+            <div class="feature-title">🛡️ Risk Engine</div>
+            <div class="feature-text">
+            Monitor drawdown, volatility, Sharpe ratio, worst-period loss, and kill-switch status.
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+with c3:
+    st.markdown(
+        """
+        <div class="feature-card">
+            <div class="feature-title">🎲 Monte Carlo Simulation</div>
+            <div class="feature-text">
+            Forecast possible portfolio outcomes and estimate downside risk using historical return behavior.
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+st.write("")
+
+c4, c5, c6 = st.columns(3)
+
+with c4:
+    st.markdown(
+        """
+        <div class="feature-card">
+            <div class="feature-title">⚡ Execution Engine</div>
+            <div class="feature-text">
+            Simulate TWAP, VWAP, immediate, and adaptive execution with slippage and market impact.
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+with c5:
+    st.markdown(
+        """
+        <div class="feature-card">
+            <div class="feature-title">🧬 Strategy DNA</div>
+            <div class="feature-text">
+            Analyze how strategies behave across bull, bear, high-volatility, and low-volatility regimes.
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+with c6:
+    st.markdown(
+        """
+        <div class="feature-card">
+            <div class="feature-title">📊 Portfolio Optimizer</div>
+            <div class="feature-text">
+            Build optimized portfolios using max Sharpe, minimum volatility, equal weight, and risk parity methods.
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+st.divider()
+
+
 if not st.session_state.logged_in:
+    st.info("Login or register from the sidebar to run the research backtest on this page. You can still explore other pages from the sidebar.")
+
     tab1, tab2 = st.sidebar.tabs(["Login", "Register"])
 
     with tab1:
@@ -88,7 +276,7 @@ if not st.session_state.logged_in:
 
 
 # =============================
-# Logout (NEW)
+# Logout
 # =============================
 st.sidebar.success(f"Logged in as: {st.session_state.username}")
 
@@ -99,15 +287,13 @@ if st.sidebar.button("Logout"):
 
 
 # =============================
-# App header
+# Research app header
 # =============================
-st.title("📊 Cost-Aware Quant Research Platform")
+st.header("📊 Cost-Aware Quant Research Platform")
 st.markdown(
     """
-This app simulates **long–short factor portfolios** under realistic transaction costs.
-
-⚠️ **Not a predictor**  
-✅ **Institutional-style research & portfolio simulation engine**
+This page runs a long-short factor research pipeline with realistic transaction costs,
+rebalancing, benchmark comparison, risk analytics, trade blotter, and report downloads.
 """
 )
 
@@ -124,7 +310,6 @@ use_profit = st.sidebar.checkbox("Profitability", True)
 cost_bps = st.sidebar.slider("Transaction Cost (bps)", 0, 50, 10, step=5)
 cost_rate = cost_bps / 10_000
 
-# ✅ ADDED (rebalance control) — does not change anything else
 st.sidebar.header("📅 Rebalance")
 rebalance_freq = st.sidebar.selectbox(
     "Rebalance Frequency",
@@ -149,7 +334,6 @@ if use_live:
         progress=False
     )
 
-    # ✅ FIX: extract Close prices safely
     if isinstance(raw.columns, pd.MultiIndex):
         prices = raw["Close"]
     else:
@@ -157,7 +341,6 @@ if use_live:
 
     prices = prices.dropna()
 
-    # Dummy fundamentals (structure-compatible)
     book = prices * 0.5
     mcap = prices * 10
     gprofit = prices * 0.3
@@ -194,11 +377,10 @@ combo = build_composite_signal(signal_list)
 # =============================
 # Portfolio & backtest
 # =============================
-# KEEP YOUR LOGIC SAME, just insert rebalance layer
-raw_positions = generate_positions(combo).shift(1).fillna(0)  # ✅ same as your original positions line
+raw_positions = generate_positions(combo).shift(1).fillna(0)
 
-reb_dates = get_rebalance_dates(raw_positions.index, freq=rebalance_freq)  # ✅ ADDED
-positions = apply_rebalance_rule(raw_positions, reb_dates)                 # ✅ ADDED
+reb_dates = get_rebalance_dates(raw_positions.index, freq=rebalance_freq)
+positions = apply_rebalance_rule(raw_positions, reb_dates)
 
 turnover = compute_turnover(positions)
 avg_turnover = turnover.mean()
@@ -209,6 +391,10 @@ net_returns = raw_returns - costs
 
 equity = compute_equity_curve(net_returns)
 equity = equity / equity.iloc[0]
+
+st.session_state["strategy_returns"] = net_returns.dropna()
+st.session_state["equity_curve"] = equity.dropna()
+st.session_state["initial_capital"] = 1.0
 
 
 # =============================
@@ -242,8 +428,6 @@ if st.sidebar.button("Save Strategy"):
     payload = {
         "signals": factors,
         "user_id": st.session_state["username"],
-
-        # optional metadata (safe defaults)
         "metrics": {
             "sharpe": float(sharpe),
             "max_drawdown": float(mdd),
@@ -255,7 +439,6 @@ if st.sidebar.button("Save Strategy"):
         "end": str(prices.index.max().date()) if len(prices.index) > 0 else "unknown",
     }
 
-    # name can be whatever you want shown in storage
     strategy_name = f"{st.session_state['username']}_strategy"
 
     save_strategy(strategy_name, payload)
@@ -290,7 +473,7 @@ st.pyplot(fig2)
 
 
 # =============================
-# Holdings + Trade Blotter (NEW FEATURE)  ✅✅ ADDED HERE
+# Holdings + Trade Blotter
 # =============================
 st.header("🧾 Holdings & Trade Blotter")
 
@@ -330,9 +513,9 @@ threshold = st.number_input(
 blotter_df = trade_blotter(positions, reb_dates, threshold=threshold)
 
 if blotter_df.empty:
-    st.info("No trades found (try lowering the threshold or changing rebalance frequency).")
+    st.info("No trades found. Try lowering the threshold or changing rebalance frequency.")
 else:
-    st.caption("Trade = NewWeight − PrevWeight (positive = buy more / cover short, negative = sell / short more)")
+    st.caption("Trade = NewWeight − PrevWeight. Positive = buy more / cover short. Negative = sell / short more.")
     st.dataframe(
         blotter_df.style.format({
             "PrevWeight": "{:.4f}",
@@ -437,7 +620,6 @@ results = []
 for cost in cost_range:
     cost_rate_test = cost / 10_000
 
-    # Apply rebalance lag
     pos_test = positions.shift(rebalance_lag).fillna(0)
 
     ret_test = compute_returns(prices, pos_test)
@@ -493,7 +675,6 @@ equity_curves = {}
 for name, sigs in strategies.items():
     combo_tmp = build_composite_signal(sigs)
 
-    # ✅ keep your logic same, add rebalance layer here too
     raw_pos_tmp = generate_positions(combo_tmp).shift(1).fillna(0)
     reb_dates_tmp = get_rebalance_dates(raw_pos_tmp.index, freq=rebalance_freq)
     pos_tmp = apply_rebalance_rule(raw_pos_tmp, reb_dates_tmp)
@@ -547,7 +728,7 @@ st.pyplot(fig_cmp)
 
 
 # =============================
-# Benchmark Dashboard (NEW FEATURE)
+# Benchmark Dashboard
 # =============================
 st.header("📌 Benchmark Dashboard (SPY / QQQ)")
 
@@ -560,7 +741,6 @@ if len(prices.index) > 0:
 bench_prices = load_benchmark_prices(symbol=bench_symbol, start=start_date)
 bench_ret = compute_benchmark_returns(bench_prices)
 
-# Align benchmark to strategy dates
 bench_ret = bench_ret.reindex(net_returns.index).fillna(0.0)
 
 alpha_ann, beta = alpha_beta(net_returns, bench_ret)
@@ -586,18 +766,15 @@ ax_b.legend()
 st.pyplot(fig_b)
 
 
-
 # =============================
-# Anomaly Spread Dashboard (NEW FEATURE)
+# Anomaly Spread Dashboard
 # =============================
 st.header("📌 Anomaly Spread (Long–Short)")
 
 st.caption("Decomposes the strategy into Long leg, Short leg, and Long–Short spread with summary stats.")
 
-# Compute leg returns from your existing prices + positions
 long_ret, short_ret, spread_ret = leg_returns(prices, positions)
 
-# Show stats table
 stats_df = summary_table(long_ret, short_ret, spread_ret)
 
 st.subheader("📋 Long/Short/Spread Summary")
@@ -610,7 +787,6 @@ st.dataframe(
     })
 )
 
-# Plot leg returns cumulative equity
 st.subheader("📈 Long vs Short vs Spread (Equity Curves)")
 
 def _eq_from_ret(r):
@@ -636,11 +812,10 @@ st.pyplot(fig_ls)
 
 
 # =============================
-# Download Report (NEW FEATURE)
+# Download Report
 # =============================
 st.header("📄 Download Strategy Report")
 
-# Strategy settings summary
 settings = {
     "Username": st.session_state.get("username", ""),
     "Factors": ", ".join([x for x, flag in [
@@ -653,7 +828,6 @@ settings = {
     "Data Source": "Yahoo Finance" if use_live else "Local CSV",
 }
 
-# Metric summary
 metrics = {
     "Sharpe Ratio": f"{sharpe:.2f}",
     "Max Drawdown": f"{mdd:.2%}",
@@ -666,7 +840,6 @@ metrics = {
     "Tracking Error": f"{te:.2%}",
 }
 
-# Re-create figures for the report (so they embed cleanly)
 fig_r1, ax_r1 = plt.subplots()
 ax_r1.plot(equity)
 ax_r1.set_title("Equity Curve (Net of Costs)")
@@ -679,7 +852,6 @@ ax_r2.set_title("Turnover Over Time")
 ax_r2.set_xlabel("Date")
 ax_r2.set_ylabel("Turnover")
 
-# Benchmark figure
 fig_r3, ax_r3 = plt.subplots()
 ax_r3.plot(equity, label="Strategy")
 ax_r3.plot(bench_eq, label=bench_symbol)
@@ -688,7 +860,6 @@ ax_r3.set_xlabel("Date")
 ax_r3.set_ylabel("Normalized Equity")
 ax_r3.legend()
 
-# Long/Short/Spread figure
 fig_r4, ax_r4 = plt.subplots()
 ax_r4.plot(eq_long, label="Long")
 ax_r4.plot(eq_short, label="Short")
@@ -735,8 +906,3 @@ st.download_button(
     file_name="strategy_report.pdf",
     mime="application/pdf",
 )
-
-
-
-
- 
