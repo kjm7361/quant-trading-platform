@@ -1,0 +1,121 @@
+import streamlit as st
+import pandas as pd
+
+from execution.alpaca_client import (
+    get_account,
+    list_positions,
+    list_orders,
+    submit_market_order,
+    submit_limit_order
+)
+
+st.set_page_config(page_title="Trading", layout="wide")
+st.title("Paper Trading (Buy/Sell Stocks)")
+
+# ---------------- Account ----------------
+with st.expander("Account", expanded=True):
+    try:
+        acct = get_account()
+        c1, c2, c3, c4 = st.columns(4)
+        c1.metric("Equity", str(acct.equity))
+        c2.metric("Cash", str(acct.cash))
+        c3.metric("Buying Power", str(acct.buying_power))
+        c4.metric("Status", str(acct.status))
+    except Exception as e:
+        st.error("Account fetch failed. Check .streamlit/secrets.toml")
+        st.exception(e)
+
+st.divider()
+
+# ---------------- Order Ticket ----------------
+st.subheader("Order Ticket")
+
+a, b, c, d, e = st.columns([1.2, 1, 1, 1, 1.2])
+
+symbol = a.text_input("Symbol", value="AAPL")
+side = b.selectbox("Side", ["buy", "sell"])
+order_type = c.selectbox("Type", ["market", "limit"])
+qty = d.number_input("Qty (shares)", min_value=0.0, value=1.0, step=1.0)
+
+limit_price = None
+if order_type == "limit":
+    limit_price = e.number_input("Limit Price", min_value=0.0, value=0.0, step=0.01)
+else:
+    e.caption("Limit price not needed")
+
+place = st.button("Place Order", type="primary")
+
+if place:
+    try:
+        if order_type == "market":
+            o = submit_market_order(symbol, qty, side)
+        else:
+            if limit_price is None or float(limit_price) <= 0:
+                st.error("Enter a valid limit price (> 0).")
+                st.stop()
+            o = submit_limit_order(symbol, qty, side, limit_price)
+
+        st.success("Order submitted.")
+        st.write(o)
+    except Exception as ex:
+        st.error("Order failed.")
+        st.exception(ex)
+
+st.divider()
+
+# ---------------- Positions ----------------
+st.subheader("Positions")
+try:
+    pos = list_positions()
+    rows = []
+    i = 0
+    while i < len(pos):
+        p = pos[i]
+        rows.append({
+            "symbol": p.symbol,
+            "qty": float(p.qty),
+            "avg_entry_price": float(p.avg_entry_price),
+            "current_price": float(p.current_price),
+            "market_value": float(p.market_value),
+            "unrealized_pl": float(p.unrealized_pl),
+            "unrealized_plpc": float(p.unrealized_plpc),
+        })
+        i += 1
+
+    if len(rows) == 0:
+        st.info("No open positions.")
+    else:
+        st.dataframe(pd.DataFrame(rows), use_container_width=True)
+except Exception as ex:
+    st.error("Could not load positions.")
+    st.exception(ex)
+
+st.divider()
+
+# ---------------- Orders ----------------
+st.subheader("Orders (latest 50)")
+try:
+    orders = list_orders(status="all", limit=50)
+    rows = []
+    j = 0
+    while j < len(orders):
+        o = orders[j]
+        rows.append({
+            "submitted_at": str(o.submitted_at),
+            "symbol": str(o.symbol),
+            "side": str(o.side),
+            "type": str(o.type),
+            "qty": float(o.qty) if o.qty is not None else None,
+            "filled_qty": float(o.filled_qty) if o.filled_qty is not None else None,
+            "status": str(o.status),
+            "limit_price": float(o.limit_price) if o.limit_price is not None else None
+        })
+        j += 1
+
+    if len(rows) == 0:
+        st.info("No orders yet.")
+    else:
+        st.dataframe(pd.DataFrame(rows), use_container_width=True)
+except Exception as ex:
+    st.error("Could not load orders.")
+    st.exception(ex)
