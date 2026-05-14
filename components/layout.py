@@ -1,14 +1,13 @@
 import streamlit as st
 
-def setup_page(title, subtitle="", icon="📊"):
-    st.set_page_config(page_title=title, layout="wide")
 
+def inject_global_css():
     st.markdown(
         """
         <style>
         .stApp {
             background:
-                radial-gradient(circle at top left, rgba(34,197,94,0.18), transparent 30%),
+                radial-gradient(circle at top left, rgba(16,185,129,0.18), transparent 28%),
                 radial-gradient(circle at top right, rgba(59,130,246,0.20), transparent 30%),
                 linear-gradient(135deg, #f8fafc 0%, #eef2ff 55%, #f0fdf4 100%);
         }
@@ -20,8 +19,7 @@ def setup_page(title, subtitle="", icon="📊"):
         }
 
         section[data-testid="stSidebar"] {
-            background: linear-gradient(180deg, #020617 0%, #0f172a 48%, #064e3b 100%);
-            border-right: 1px solid rgba(255,255,255,0.08);
+            background: linear-gradient(180deg, #020617 0%, #0f172a 50%, #064e3b 100%);
         }
 
         section[data-testid="stSidebar"] * {
@@ -35,15 +33,21 @@ def setup_page(title, subtitle="", icon="📊"):
             border-radius: 12px !important;
         }
 
+        [data-testid="stMetric"] {
+            background: linear-gradient(135deg, rgba(255,255,255,0.96), rgba(240,253,244,0.92));
+            border: 1px solid rgba(148,163,184,0.28);
+            padding: 18px 20px;
+            border-radius: 20px;
+            box-shadow: 0 12px 30px rgba(15,23,42,0.08);
+        }
+
         .hero-card {
-            background:
-                linear-gradient(135deg, rgba(15,23,42,0.98), rgba(30,64,175,0.95), rgba(5,150,105,0.92));
+            background: linear-gradient(135deg, #020617, #1e3a8a, #059669);
             padding: 34px 38px;
             border-radius: 30px;
             color: white;
             box-shadow: 0 24px 60px rgba(15,23,42,0.28);
             margin-bottom: 28px;
-            border: 1px solid rgba(255,255,255,0.14);
         }
 
         .hero-title {
@@ -56,12 +60,10 @@ def setup_page(title, subtitle="", icon="📊"):
         .hero-subtitle {
             color: #dbeafe;
             font-size: 1rem;
-            max-width: 900px;
         }
 
         .section-card {
-            background: rgba(255,255,255,0.88);
-            border: 1px solid rgba(148,163,184,0.28);
+            background: rgba(255,255,255,0.9);
             border-left: 6px solid #10b981;
             border-radius: 20px;
             padding: 18px 22px;
@@ -69,40 +71,69 @@ def setup_page(title, subtitle="", icon="📊"):
             box-shadow: 0 10px 30px rgba(15,23,42,0.07);
         }
 
-        .section-card h3 {
-            margin-bottom: 0.2rem;
-            color: #0f172a;
-            font-weight: 850;
+        .brand-box {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 18px;
+            padding: 16px;
+            margin-bottom: 18px;
         }
 
-        .section-card p {
-            color: #64748b;
-            margin-bottom: 0;
-        }
-
-        [data-testid="stMetric"] {
-            background: linear-gradient(135deg, rgba(255,255,255,0.96), rgba(240,253,244,0.9));
-            border: 1px solid rgba(148,163,184,0.28);
-            padding: 18px 20px;
-            border-radius: 20px;
-            box-shadow: 0 12px 30px rgba(15,23,42,0.08);
-            transition: 0.2s ease;
-        }
-
-        [data-testid="stMetric"]:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 18px 38px rgba(15,23,42,0.12);
-        }
-
-        [data-testid="stMetricLabel"] {
-            color: #64748b !important;
-            font-weight: 700;
-        }
-
-        [data-testid="stMetricValue"] {
-            font-size: 1.65rem;
+        .brand-title {
+            font-size: 1.1rem;
             font-weight: 900;
-            color: #0f172a;
+            color: white;
+        }
+
+        .brand-subtitle {
+            font-size: 0.78rem;
+            color: #bbf7d0;
+            margin-top: 4px;
+        }
+
+        .ticker-strip {
+            background: #020617;
+            color: white;
+            border-radius: 18px;
+            padding: 12px 18px;
+            margin-bottom: 18px;
+            box-shadow: 0 10px 26px rgba(15,23,42,0.18);
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .ticker-positive {
+            color: #86efac;
+            font-weight: 800;
+            margin-right: 26px;
+        }
+
+        .ticker-negative {
+            color: #fca5a5;
+            font-weight: 800;
+            margin-right: 26px;
+        }
+
+        .quick-card {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 18px;
+            padding: 14px;
+            margin-top: 16px;
+            margin-bottom: 18px;
+        }
+
+        .quick-title {
+            font-weight: 900;
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .quick-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            margin-bottom: 6px;
         }
 
         .stButton > button {
@@ -112,28 +143,61 @@ def setup_page(title, subtitle="", icon="📊"):
             color: white;
             background: linear-gradient(135deg, #2563eb, #10b981);
             box-shadow: 0 10px 24px rgba(37,99,235,0.28);
-            transition: 0.2s ease;
-        }
-
-        .stButton > button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 16px 34px rgba(16,185,129,0.32);
-        }
-
-        div[data-testid="stDataFrame"] {
-            border-radius: 18px;
-            overflow: hidden;
-            border: 1px solid rgba(148,163,184,0.28);
-            box-shadow: 0 12px 32px rgba(15,23,42,0.07);
-        }
-
-        .stAlert {
-            border-radius: 16px;
         }
         </style>
         """,
         unsafe_allow_html=True
     )
+
+
+def sidebar_brand():
+    st.sidebar.markdown(
+        """
+        <div class="brand-box">
+            <div class="brand-title">⚡ Quant Terminal</div>
+            <div class="brand-subtitle">Trading · Risk · Portfolio Intelligence</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+def market_ticker():
+    st.markdown(
+        """
+        <div class="ticker-strip">
+            <span class="ticker-positive">SPY +0.42%</span>
+            <span class="ticker-positive">QQQ +0.68%</span>
+            <span class="ticker-negative">IWM -0.21%</span>
+            <span class="ticker-positive">NVDA +1.14%</span>
+            <span class="ticker-negative">TSLA -0.76%</span>
+            <span class="ticker-positive">AAPL +0.31%</span>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+def quick_stats(equity="N/A", pnl="N/A", positions="N/A", status="Normal"):
+    st.sidebar.markdown(
+        f"""
+        <div class="quick-card">
+            <div class="quick-title">📊 Quick Stats</div>
+            <div class="quick-row"><span>Equity</span><span>{equity}</span></div>
+            <div class="quick-row"><span>Day P&L</span><span>{pnl}</span></div>
+            <div class="quick-row"><span>Positions</span><span>{positions}</span></div>
+            <div class="quick-row"><span>Status</span><span>{status}</span></div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+def setup_page(title, subtitle="", icon="📊"):
+    st.set_page_config(page_title=title, layout="wide")
+    inject_global_css()
+    sidebar_brand()
+    market_ticker()
 
     st.markdown(
         f"""
@@ -153,8 +217,8 @@ def section(title, subtitle=""):
     st.markdown(
         f"""
         <div class="section-card">
-            <h3>{title}</h3>
-            <p>{subtitle}</p>
+            <h3 style="margin-bottom:0.2rem;">{title}</h3>
+            <p style="color:#64748b; margin-bottom:0;">{subtitle}</p>
         </div>
         """,
         unsafe_allow_html=True
