@@ -368,252 +368,170 @@ if "logged_in" not in st.session_state:
 
 
 # =============================
-# Premium landing page
+# Premium cinematic landing page
 # =============================
-st.markdown(
-    """
-    <div class="top-nav">
-        <div class="brand-wrap">
-            <div class="brand-logo"></div>
-            <div class="brand-name">TradePro Quant</div>
-        </div>
-        <div>
-            <span class="nav-pill">Dashboard</span>
-            <span class="nav-pill">Markets</span>
-            <span class="nav-pill">Portfolio</span>
-            <span class="nav-pill">Screener</span>
-            <span class="nav-pill">News</span>
+
+st.markdown("""
+<style>
+
+.space-hero {
+    text-align: center;
+    padding: 90px 30px;
+    border-radius: 30px;
+    background:
+        radial-gradient(circle at top, rgba(59,130,246,0.40), transparent 35%),
+        radial-gradient(circle at bottom, rgba(245,158,11,0.22), transparent 35%),
+        linear-gradient(180deg,#020617 0%,#0f172a 100%);
+    color: white;
+    margin-bottom: 30px;
+    box-shadow: 0px 20px 60px rgba(0,0,0,0.45);
+}
+
+.hero-badge {
+    display:inline-block;
+    padding:8px 18px;
+    border-radius:999px;
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.15);
+    color:#93c5fd;
+    font-weight:700;
+    margin-bottom:20px;
+}
+
+.space-title {
+    font-size:64px;
+    font-weight:900;
+    color:white;
+    margin-bottom:20px;
+    line-height:1.1;
+}
+
+.space-subtitle {
+    font-size:20px;
+    color:#cbd5e1;
+    max-width:900px;
+    margin:auto;
+    line-height:1.7;
+}
+
+.cta-row {
+    margin-top:35px;
+}
+
+.cta-primary {
+    background:white;
+    color:black;
+    padding:14px 30px;
+    border-radius:999px;
+    font-weight:900;
+    box-shadow:0 0 35px rgba(96,165,250,0.45);
+}
+
+.future-line {
+    text-align:center;
+    color:white;
+    letter-spacing:6px;
+    font-size:22px;
+    font-weight:800;
+    margin-top:55px;
+}
+
+.feature-card-dark {
+    background: linear-gradient(180deg, rgba(15,23,42,0.95), rgba(2,6,23,0.95));
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 22px;
+    padding: 24px;
+    min-height: 145px;
+    box-shadow: 0 18px 45px rgba(0,0,0,0.35);
+}
+
+.feature-card-title {
+    color: white;
+    font-size: 1.15rem;
+    font-weight: 900;
+    margin-bottom: 10px;
+}
+
+.feature-card-text {
+    color: #94a3b8;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+
+st.markdown("""
+<div class="space-hero">
+
+<div class="hero-badge">
+🚀 Advanced AI-Driven Quantitative Trading Platform
+</div>
+
+<div class="space-title">
+TradePro Quant Fund
+</div>
+
+<div class="space-subtitle">
+A systematic quant research platform built for portfolio optimization,
+Monte Carlo simulation, risk analytics, market anomaly detection,
+algorithmic trading research, and AI-powered investment strategies.
+</div>
+
+<div class="cta-row">
+<span class="cta-primary">Launch Dashboard</span>
+</div>
+
+<div class="future-line">
+THE FUTURE OF QUANTITATIVE TRADING
+</div>
+
+</div>
+""", unsafe_allow_html=True)
+
+
+f1, f2, f3, f4 = st.columns(4)
+
+with f1:
+    st.markdown("""
+    <div class="feature-card-dark">
+        <div class="feature-card-title">🛡️ Risk Engine</div>
+        <div class="feature-card-text">
+        Drawdown, volatility, Sharpe ratio, worst-period loss, and kill-switch monitoring.
         </div>
     </div>
+    """, unsafe_allow_html=True)
 
-    <div class="ticker-strip">
-        <span class="ticker-label">⌁ Live</span>
-        <span class="ticker-item">SPY $526 <span class="up">+0.42%</span></span>
-        <span class="ticker-item">QQQ $451 <span class="up">+0.68%</span></span>
-        <span class="ticker-item">NVDA $948 <span class="up">+1.14%</span></span>
-        <span class="ticker-item">TSLA $173 <span class="down">-0.76%</span></span>
-        <span class="ticker-item">AAPL $190 <span class="up">+0.31%</span></span>
+with f2:
+    st.markdown("""
+    <div class="feature-card-dark">
+        <div class="feature-card-title">🎲 Monte Carlo</div>
+        <div class="feature-card-text">
+        Forward portfolio simulations, scenario analysis, and probability-based forecasting.
+        </div>
     </div>
-    """,
-    unsafe_allow_html=True
-)
+    """, unsafe_allow_html=True)
 
-username_display = st.session_state.username if st.session_state.logged_in else "Trader"
-
-st.markdown(
-    f"""
-    <div class="welcome-title">Good morning, {username_display}</div>
-    <div class="welcome-subtitle">Friday, 15 May 2026 · Markets open · Quant research workspace active</div>
-    """,
-    unsafe_allow_html=True
-)
-
-m1, m2, m3, m4 = st.columns(4)
-
-with m1:
-    st.markdown(
-        """
-        <div class="kpi-card">
-            <div class="kpi-label">Portfolio value</div>
-            <div class="kpi-value">$421,800</div>
-            <div class="kpi-note-green">↗ +2.1% today</div>
+with f3:
+    st.markdown("""
+    <div class="feature-card-dark">
+        <div class="feature-card-title">📊 Optimizer</div>
+        <div class="feature-card-text">
+        Max Sharpe, minimum volatility, equal-weight, and risk-parity portfolio construction.
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+    </div>
+    """, unsafe_allow_html=True)
 
-with m2:
-    st.markdown(
-        """
-        <div class="kpi-card">
-            <div class="kpi-label">Day P&L</div>
-            <div class="kpi-value" style="color:#3f7d20;">+$8,340</div>
-            <div class="kpi-note-green">Realised + open</div>
+with f4:
+    st.markdown("""
+    <div class="feature-card-dark">
+        <div class="feature-card-title">⚡ Trading Sim</div>
+        <div class="feature-card-text">
+        Simulated execution, positions, orders, performance tracking, and trading workflow.
         </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-with m3:
-    st.markdown(
-        """
-        <div class="kpi-card">
-            <div class="kpi-label">Open positions</div>
-            <div class="kpi-value">7</div>
-            <div class="kpi-note-green">3 in profit · 4 open</div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-with m4:
-    st.markdown(
-        """
-        <div class="kpi-card">
-            <div class="kpi-label">Win rate</div>
-            <div class="kpi-value">68%</div>
-            <div class="kpi-note-green">↗ +4% vs last month</div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-left, right = st.columns([2.2, 1])
-
-with left:
-    st.markdown(
-        """
-        <div class="panel">
-            <div class="panel-title">Portfolio performance</div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    perf_df = pd.DataFrame({
-        "Equity": [400000, 403000, 401800, 407500, 409000, 415000, 421800]
-    }, index=["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"])
-
-    st.line_chart(perf_df)
-
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    st.markdown(
-        """
-        <div class="panel">
-            <div class="panel-title">Daily picks</div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    p1, p2, p3 = st.columns(3)
-
-    with p1:
-        st.markdown(
-            """
-            <div class="mini-card">
-                <div class="mini-title">NVDA</div>
-                <div class="mini-sub">Target $990</div>
-                <div class="buy-pill">Buy</div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-    with p2:
-        st.markdown(
-            """
-            <div class="mini-card">
-                <div class="mini-title">MSFT</div>
-                <div class="mini-sub">Target $440</div>
-                <div class="buy-pill">Buy</div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-    with p3:
-        st.markdown(
-            """
-            <div class="mini-card">
-                <div class="mini-title">TSLA</div>
-                <div class="mini-sub">SL $165</div>
-                <div class="sell-pill">Sell</div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    st.markdown(
-        """
-        <div class="panel">
-            <div class="panel-title">Market news</div>
-
-            <div class="news-row">
-                <span class="news-dot-green"></span>
-                <span class="news-title">Fed signals cautious optimism as inflation cools</span>
-                <div class="news-source">Reuters · 2h ago</div>
-            </div>
-
-            <div class="news-row">
-                <span class="news-dot-red"></span>
-                <span class="news-title">Nasdaq slips intraday as mega-cap tech consolidates</span>
-                <div class="news-source">MarketWatch · 3h ago</div>
-            </div>
-
-            <div class="news-row">
-                <span class="news-dot-green"></span>
-                <span class="news-title">Semiconductor earnings beat estimates; AI demand remains strong</span>
-                <div class="news-source">Bloomberg · 5h ago</div>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-with right:
-    st.markdown(
-        """
-        <div class="panel">
-            <div class="panel-title">Watchlist</div>
-            <div class="news-row"><span class="news-title">SPY</span><div class="news-source">ETF</div></div>
-            <div class="news-row"><span class="news-title">NVDA</span><div class="news-source">NASDAQ</div></div>
-            <div class="news-row"><span class="news-title">AAPL</span><div class="news-source">NASDAQ</div></div>
-            <div class="news-row"><span class="news-title">MSFT</span><div class="news-source">NASDAQ</div></div>
-            <div class="news-row"><span class="news-title">QQQ</span><div class="news-source">ETF</div></div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    st.markdown(
-        """
-        <div class="quick-trade">
-            <div class="panel-title">Quick trade</div>
-            <div class="quick-button">Buy</div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    qt_symbol = st.text_input("Symbol", placeholder="e.g. AAPL")
-    qt_qty = st.number_input("Quantity", min_value=0, value=0, step=1)
-
-    st.button("Place demo order", use_container_width=True)
-
-st.divider()
-
-
-if not st.session_state.logged_in:
-    st.info("Login or register from the sidebar to run the research backtest on this page. You can still explore other pages from the sidebar.")
-
-    tab1, tab2 = st.sidebar.tabs(["Login", "Register"])
-
-    with tab1:
-        username = st.text_input("Username")
-        password = st.text_input("Password", type="password")
-
-        if st.button("Login"):
-            if authenticate(username, password):
-                st.session_state.logged_in = True
-                st.session_state.username = username
-                st.rerun()
-            else:
-                st.error("Invalid username or password")
-
-    with tab2:
-        new_user = st.text_input("New Username")
-        new_pass = st.text_input("New Password", type="password")
-
-        if st.button("Register"):
-            if save_user(new_user, new_pass):
-                st.success("Account created! Please log in.")
-            else:
-                st.error("Username already exists")
-
-    st.stop()
-
+    </div>
+    """, unsafe_allow_html=True)
 
 # =============================
 # Logout
