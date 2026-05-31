@@ -480,7 +480,7 @@ algorithmic trading research, and AI-powered investment strategies.
 </div>
 
 <div class="cta-row">
-<span class="cta-primary">Launch Dashboard</span>
+<span class="cta-primary">Scroll Down to Platform</span>
 </div>
 
 <div class="future-line">
@@ -489,6 +489,20 @@ THE FUTURE OF QUANTITATIVE TRADING
 
 </div>
 """, unsafe_allow_html=True)
+
+nav1, nav2, nav3, nav4 = st.columns(4)
+
+with nav1:
+    st.page_link("pages/0_dashboard.py", label="Open Dashboard", icon="📊")
+
+with nav2:
+    st.page_link("pages/4_Market_Prices.py", label="Market Prices", icon="📈")
+
+with nav3:
+    st.page_link("pages/9_RiskEngine.py", label="Risk Engine", icon="🛡️")
+
+with nav4:
+    st.page_link("pages/11_MonteCarlo.py", label="Monte Carlo", icon="🎲")
 
 
 f1, f2, f3, f4 = st.columns(4)
@@ -532,6 +546,52 @@ with f4:
         </div>
     </div>
     """, unsafe_allow_html=True)
+
+# =============================
+# Landing Page Visual Preview
+# =============================
+st.markdown("<br>", unsafe_allow_html=True)
+
+v1, v2 = st.columns([1.5, 1])
+
+with v1:
+    st.markdown("""
+    <div style="
+        background: linear-gradient(135deg, rgba(15,23,42,0.96), rgba(30,64,175,0.75));
+        border: 1px solid rgba(255,255,255,0.14);
+        border-radius: 28px;
+        padding: 28px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    ">
+        <div style="color:white; font-size:1.5rem; font-weight:900; margin-bottom:8px;">
+            📈 Strategy Performance Preview
+        </div>
+        <div style="color:#94a3b8; margin-bottom:18px;">
+            Simulated quant portfolio equity curve with risk-aware execution logic.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    preview_df = pd.DataFrame({
+        "Equity Curve": [100, 103, 101, 108, 115, 112, 121, 132, 129, 141, 153, 160]
+    })
+
+    st.line_chart(preview_df)
+
+with v2:
+    st.markdown("""
+<div style="background: radial-gradient(circle at top, rgba(245,158,11,0.25), transparent 35%), linear-gradient(180deg, rgba(15,23,42,0.98), rgba(2,6,23,0.98)); border: 1px solid rgba(255,255,255,0.14); border-radius: 28px; padding: 28px; box-shadow: 0 20px 60px rgba(0,0,0,0.35); min-height: 345px;">
+<h3 style="color:white; font-size:1.4rem; font-weight:900; margin-bottom:18px;">🧠 Quant Modules</h3>
+<p style="color:#cbd5e1; margin-bottom:14px;">● Monte Carlo Forecasting</p>
+<p style="color:#cbd5e1; margin-bottom:14px;">● Portfolio Optimization</p>
+<p style="color:#cbd5e1; margin-bottom:14px;">● Market Regime Detection</p>
+<p style="color:#cbd5e1; margin-bottom:14px;">● Risk Monitoring Engine</p>
+<p style="color:#cbd5e1; margin-bottom:14px;">● Trading Simulation</p>
+<div style="margin-top:24px; background:rgba(255,255,255,0.08); border-radius:16px; padding:14px; color:#93c5fd; font-weight:800;">
+System Status: Research Terminal Online
+</div>
+</div>
+""", unsafe_allow_html=True)
 
 # =============================
 # Logout
