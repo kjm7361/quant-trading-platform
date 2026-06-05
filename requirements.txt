@@ -8,3 +8,4 @@ feedparser
 scipy
 altair
 reportlab
+statsmodels
