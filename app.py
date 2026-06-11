@@ -572,11 +572,18 @@ with v1:
     </div>
     """, unsafe_allow_html=True)
 
+equity_preview = st.session_state.get("equity_curve", None)
+
+if equity_preview is not None and len(equity_preview) > 0:
+    preview_df = pd.DataFrame({
+        "Equity Curve": pd.Series(equity_preview).reset_index(drop=True)
+    })
+else:
     preview_df = pd.DataFrame({
         "Equity Curve": [100, 103, 101, 108, 115, 112, 121, 132, 129, 141, 153, 160]
     })
 
-    st.line_chart(preview_df)
+st.line_chart(preview_df)
 
 with v2:
     st.markdown("""
@@ -594,15 +601,45 @@ System Status: Research Terminal Online
 """, unsafe_allow_html=True)
 
 # =============================
-# Logout
+# Account / Login / Logout
 # =============================
-st.sidebar.success(f"Logged in as: {st.session_state.username}")
 
-if st.sidebar.button("Logout"):
-    st.session_state.logged_in = False
-    st.session_state.username = None
-    st.rerun()
+if not st.session_state.get("logged_in", False):
+    tab1, tab2 = st.sidebar.tabs(["Login", "Register"])
 
+    with tab1:
+        username = st.text_input("Username", key="login_username")
+        password = st.text_input("Password", type="password", key="login_password")
+
+        if st.button("Login"):
+            if authenticate(username, password):
+                st.session_state.logged_in = True
+                st.session_state.username = username
+                st.rerun()
+            else:
+                st.error("Invalid username or password")
+
+    with tab2:
+        new_user = st.text_input("New Username", key="register_username")
+        new_pass = st.text_input("New Password", type="password", key="register_password")
+
+        if st.button("Register"):
+            if save_user(new_user, new_pass):
+                st.success("Account created! Please log in.")
+            else:
+                st.error("Username already exists")
+
+    st.stop()
+
+else:
+    if st.session_state.get("username"):
+        st.sidebar.success(f"Logged in as: {st.session_state.username}")
+    else:
+        st.sidebar.warning("Session active, but username missing. Please logout and login again.")
+
+    if st.sidebar.button("Logout"):
+        st.session_state.clear()
+        st.rerun()
 
 # =============================
 # Research app header
