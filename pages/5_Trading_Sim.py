@@ -3,17 +3,27 @@ import pandas as pd
 from datetime import datetime
 import numpy as np
 import yfinance as yf
+import plotly.graph_objects as go
 
-from components.layout import setup_page, section, next_step
-
+from components.layout import (
+    setup_page, section, next_step, plotly_config,
+    _AMBER, _CYAN, _GREEN, _RED, _TEXT_MUT,
+)
 from execution.sim_broker import (
     init_db,
     get_cash,
     get_positions,
     place_market_order,
     list_trades,
-    reset_account
+    reset_account,
 )
+from core.state import bootstrap, is_kill_switch_active, set_broker_mode, get_broker_mode, add_trade
+
+try:
+    from execution import alpaca_client as _ac
+    _ALPACA_IMPORTABLE = True
+except Exception:
+    _ALPACA_IMPORTABLE = False
 
 # =============================
 # Page setup
@@ -217,25 +227,58 @@ def build_equity_curve_from_trades_mark_to_market(
 
 
 # =============================
-# Initialize DB
+# Initialize DB + state
 # =============================
 init_db()
+bootstrap()
+
+# ── Detect Alpaca availability and set broker mode ────────────────────────────
+_alpaca_ok = _ALPACA_IMPORTABLE and _ac.alpaca_available()
+set_broker_mode("ALPACA_PAPER" if _alpaca_ok else "SIMULATED")
 
 # =============================
 # Kill switch protection
 # =============================
-if st.session_state.get("kill_switch", False):
-    st.error("Trading Disabled Due to Risk Limits")
-
+if is_kill_switch_active():
+    st.error("🛑 Trading Disabled — Kill Switch Active", icon="🛑")
     reasons = st.session_state.get("kill_switch_reasons", [])
-
-    k = 0
-    while k < len(reasons):
-        st.write(f"- {reasons[k]}")
-        k += 1
-
+    for r in reasons:
+        st.write(f"- {r}")
     st.stop()
 
+
+# =============================
+# Broker Connection Status
+# =============================
+section("Broker Connection")
+broker_mode = get_broker_mode()
+if _alpaca_ok:
+    st.markdown(
+        f"""<div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.22);
+        border-left:4px solid {_GREEN};border-radius:8px;padding:12px 16px;
+        font-family:'JetBrains Mono',monospace;color:#E2E8F0;font-size:0.85rem;">
+        🟢 <b>Alpaca Paper Trading</b> connected · Orders route to Alpaca paper account
+        </div>""",
+        unsafe_allow_html=True,
+    )
+    try:
+        acct = _ac.get_account()
+        bc1, bc2, bc3 = st.columns(3)
+        bc1.metric("Account Status", str(acct.status).upper() if hasattr(acct, "status") else "OK")
+        bc2.metric("Buying Power",   f"${float(acct.buying_power):,.0f}" if hasattr(acct, "buying_power") else "—")
+        bc3.metric("Equity",         f"${float(acct.equity):,.0f}"        if hasattr(acct, "equity")        else "—")
+    except Exception as e:
+        st.warning(f"Connected but could not fetch account info: {e}")
+else:
+    st.markdown(
+        f"""<div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.22);
+        border-left:4px solid {_AMBER};border-radius:8px;padding:12px 16px;
+        font-family:'JetBrains Mono',monospace;color:#E2E8F0;font-size:0.85rem;">
+        🟡 <b>Simulated Broker</b> — SQLite paper trading · Add Alpaca secrets to enable live paper orders
+        </div>""",
+        unsafe_allow_html=True,
+    )
+st.divider()
 
 # =============================
 # Sidebar
@@ -285,14 +328,51 @@ else:
     c4.metric("Live Price", round(price, 4))
 
 if st.button("Place Market Order", type="primary"):
-    res = place_market_order(symbol, qty, side, price)
+    # ── Risk checks ───────────────────────────────────────────────────────────
+    order_value   = qty * price
+    _current_cash = float(get_cash())
+    _risk_errors  = []
 
-    if res.get("ok"):
-        st.success("Order filled successfully.")
-        st.write(res)
+    if is_kill_switch_active():
+        _risk_errors.append("Kill switch is active — trading disabled.")
+    if side == "buy" and order_value > _current_cash:
+        _risk_errors.append(f"Insufficient cash: order value ${order_value:,.2f} exceeds cash ${_current_cash:,.2f}.")
+    if qty <= 0:
+        _risk_errors.append("Quantity must be greater than zero.")
+    if price <= 0:
+        _risk_errors.append("Price must be greater than zero.")
+    if order_value > _current_cash * 0.40 and side == "buy":
+        st.warning(
+            f"Position size alert: this order is {order_value/_current_cash:.0%} of cash. "
+            "Consider sizing no more than 40% per position for diversification.",
+            icon="⚠️",
+        )
 
+    if _risk_errors:
+        for err in _risk_errors:
+            st.error(err)
     else:
-        st.error(res.get("error", "Order failed"))
+        # ── Route order ───────────────────────────────────────────────────────
+        if _alpaca_ok:
+            try:
+                alpaca_order = _ac.submit_market_order(symbol, qty, side)
+                st.success(f"✓ Alpaca paper order submitted — ID: {alpaca_order.id}")
+                add_trade(symbol, side, qty, price)
+            except Exception as e:
+                st.error(f"Alpaca order failed: {e}. Falling back to sim broker.")
+                res = place_market_order(symbol, qty, side, price)
+                if res.get("ok"):
+                    st.success("✓ Sim order filled (Alpaca fallback).")
+                    add_trade(symbol, side, qty, price)
+                else:
+                    st.error(res.get("error", "Order failed"))
+        else:
+            res = place_market_order(symbol, qty, side, price)
+            if res.get("ok"):
+                st.success("✓ Sim order filled.")
+                add_trade(symbol, side, qty, price)
+            else:
+                st.error(res.get("error", "Order failed"))
 
 st.divider()
 
@@ -429,7 +509,15 @@ if len(equity_curve) > 0:
         "Portfolio value marked to market using historical prices."
     )
 
-    st.line_chart(equity_curve)
+    fig = go.Figure(go.Scatter(
+        x=equity_curve.index.tolist(),
+        y=equity_curve.values.tolist(),
+        mode="lines",
+        name="Equity",
+        line=dict(color="#10b981", width=2)
+    ))
+    fig.update_layout(title="Equity Curve", xaxis_title="Date", yaxis_title="Portfolio Value", **plotly_config())
+    st.plotly_chart(fig, use_container_width=True)
 
     used_symbols = []
 

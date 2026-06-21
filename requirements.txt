@@ -9,3 +9,5 @@ scipy
 altair
 reportlab
 statsmodels
+scikit-learn
+alpaca-py
