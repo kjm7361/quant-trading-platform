@@ -1,9 +1,9 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 import yfinance as yf
 
-from components.layout import setup_page, section, next_step
+from components.layout import setup_page, section, next_step, plotly_config
 
 from market.anomalies import (
     returns_from_prices,
@@ -48,8 +48,10 @@ if raw.empty:
     st.error("No data returned. Try a different symbol or start date.")
     st.stop()
 
+if isinstance(raw.columns, pd.MultiIndex):
+    raw.columns = raw.columns.get_level_values(0)
 price_col = "Adj Close" if use_adjusted and "Adj Close" in raw.columns else "Close"
-prices = raw[price_col].dropna()
+prices = raw[price_col].squeeze().dropna()
 rets = returns_from_prices(prices)
 
 if len(rets) == 0:
@@ -83,12 +85,11 @@ with c1:
     st.dataframe(dow.style.format({"mean": "{:.4%}", "std": "{:.4%}"}), use_container_width=True)
 
 with c2:
-    fig, ax = plt.subplots(figsize=(8, 4))
-    ax.bar(dow.index, dow["mean"])
-    ax.set_title("Average Daily Return by Weekday")
-    ax.set_ylabel("Mean Daily Return")
-    ax.set_xlabel("Weekday")
-    st.pyplot(fig)
+    fig_dow = go.Figure(go.Bar(x=dow.index, y=dow["mean"], marker_color="#10b981"))
+    fig_dow.update_layout(title="Average Daily Return by Weekday",
+                          xaxis_title="Weekday", yaxis_title="Mean Daily Return",
+                          **plotly_config())
+    st.plotly_chart(fig_dow, use_container_width=True)
 
 if dow["mean"].max() > 0:
     best_day = str(dow["mean"].idxmax())
@@ -110,12 +111,11 @@ with c1:
     st.dataframe(mon.style.format({"mean": "{:.4%}", "std": "{:.4%}"}), use_container_width=True)
 
 with c2:
-    fig, ax = plt.subplots(figsize=(8, 4))
-    ax.bar(mon.index, mon["mean"])
-    ax.set_title("Average Daily Return by Month")
-    ax.set_ylabel("Mean Daily Return")
-    ax.set_xlabel("Month")
-    st.pyplot(fig)
+    fig_mon = go.Figure(go.Bar(x=mon.index, y=mon["mean"], marker_color="#3b82f6"))
+    fig_mon.update_layout(title="Average Daily Return by Month",
+                          xaxis_title="Month", yaxis_title="Mean Daily Return",
+                          **plotly_config())
+    st.plotly_chart(fig_mon, use_container_width=True)
 
 best_month = str(mon["mean"].idxmax())
 worst_month = str(mon["mean"].idxmin())
@@ -135,12 +135,11 @@ with c1:
     st.dataframe(tom.style.format({"mean": "{:.4%}", "std": "{:.4%}"}), use_container_width=True)
 
 with c2:
-    fig, ax = plt.subplots(figsize=(8, 4))
-    ax.bar(tom.index, tom["mean"])
-    ax.set_title("Average Daily Return: Turn-of-Month vs Rest")
-    ax.set_ylabel("Mean Daily Return")
-    ax.set_xlabel("Bucket")
-    st.pyplot(fig)
+    fig_tom = go.Figure(go.Bar(x=tom.index, y=tom["mean"], marker_color="#f59e0b"))
+    fig_tom.update_layout(title="Average Daily Return: Turn-of-Month vs Rest",
+                          xaxis_title="Bucket", yaxis_title="Mean Daily Return",
+                          **plotly_config())
+    st.plotly_chart(fig_tom, use_container_width=True)
 
 if len(tom) >= 2:
     best_bucket = str(tom["mean"].idxmax())
@@ -160,12 +159,11 @@ with c1:
     st.dataframe(mr.style.format({"mean": "{:.4%}", "std": "{:.4%}"}), use_container_width=True)
 
 with c2:
-    fig, ax = plt.subplots(figsize=(8, 4))
-    ax.bar(mr.index, mr["mean"])
-    ax.set_title(f"Next {forward}-day Return After Past {lookback}-day Move")
-    ax.set_ylabel("Mean Forward Return")
-    ax.set_xlabel("Past-Return Bucket")
-    st.pyplot(fig)
+    fig_mr = go.Figure(go.Bar(x=mr.index, y=mr["mean"], marker_color="#8b5cf6"))
+    fig_mr.update_layout(title=f"Next {forward}-day Return After Past {lookback}-day Move",
+                         xaxis_title="Past-Return Bucket", yaxis_title="Mean Forward Return",
+                         **plotly_config())
+    st.plotly_chart(fig_mr, use_container_width=True)
 
 # -------------------------
 # Interpretation
