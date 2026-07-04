@@ -2,9 +2,9 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import yfinance as yf
-import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 
-from components.layout import setup_page, section, next_step
+from components.layout import setup_page, section, next_step, plotly_config
 
 
 # =============================
@@ -259,17 +259,10 @@ def build_weight_df(tickers, weights):
 
 
 def create_weight_bar_chart(weight_df, title):
-    fig, ax = plt.subplots(figsize=(10, 4))
-
-    ax.bar(
-        weight_df["Ticker"],
-        weight_df["Weight %"]
-    )
-
-    ax.set_title(title)
-    ax.set_ylabel("Weight %")
-    ax.set_xlabel("Ticker")
-
+    fig = go.Figure(go.Bar(x=weight_df["Ticker"], y=weight_df["Weight %"],
+                           marker_color="#10b981"))
+    fig.update_layout(title=title, xaxis_title="Ticker", yaxis_title="Weight %",
+                      **plotly_config())
     return fig
 
 
@@ -553,20 +546,12 @@ section(
 col1, col2 = st.columns(2)
 
 with col1:
-    fig1 = create_weight_bar_chart(
-        opt_weight_df,
-        f"{method} Weights"
-    )
-
-    st.pyplot(fig1)
+    fig1 = create_weight_bar_chart(opt_weight_df, f"{method} Weights")
+    st.plotly_chart(fig1, use_container_width=True)
 
 with col2:
-    fig2 = create_weight_bar_chart(
-        eq_weight_df,
-        "Equal Weight Portfolio"
-    )
-
-    st.pyplot(fig2)
+    fig2 = create_weight_bar_chart(eq_weight_df, "Equal Weight Portfolio")
+    st.plotly_chart(fig2, use_container_width=True)
 
 st.divider()
 
@@ -585,37 +570,25 @@ cloud_df = simulate_efficient_cloud(
     n_points=1200
 )
 
-fig3, ax3 = plt.subplots(figsize=(10, 5))
-
-ax3.scatter(
-    cloud_df["Volatility"] * 100,
-    cloud_df["Return"] * 100,
-    alpha=0.35,
-    s=12
-)
-
-ax3.scatter(
-    [opt_vol * 100],
-    [opt_return * 100],
-    s=120,
-    marker="x",
-    label=method
-)
-
-ax3.scatter(
-    [eq_vol * 100],
-    [eq_return * 100],
-    s=120,
-    marker="o",
-    label="Equal Weight"
-)
-
-ax3.set_xlabel("Volatility %")
-ax3.set_ylabel("Expected Return %")
-ax3.set_title("Portfolio Opportunity Set")
-ax3.legend()
-
-st.pyplot(fig3)
+fig3 = go.Figure()
+fig3.add_trace(go.Scatter(
+    x=cloud_df["Volatility"] * 100, y=cloud_df["Return"] * 100,
+    mode="markers", name="Simulated Portfolios",
+    marker=dict(color="#3b82f6", size=4, opacity=0.35),
+))
+fig3.add_trace(go.Scatter(
+    x=[opt_vol * 100], y=[opt_return * 100],
+    mode="markers", name=method,
+    marker=dict(color="#10b981", size=14, symbol="x"),
+))
+fig3.add_trace(go.Scatter(
+    x=[eq_vol * 100], y=[eq_return * 100],
+    mode="markers", name="Equal Weight",
+    marker=dict(color="#f59e0b", size=14, symbol="circle"),
+))
+fig3.update_layout(title="Portfolio Opportunity Set", xaxis_title="Volatility %",
+                   yaxis_title="Expected Return %", **plotly_config())
+st.plotly_chart(fig3, use_container_width=True)
 
 st.divider()
 

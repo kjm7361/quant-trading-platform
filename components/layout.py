@@ -111,8 +111,15 @@ def inject_global_css():
             z-index: 0;
         }}
 
+        /* Remove Streamlit's default magenta/gradient decoration strip */
+        [data-testid="stDecoration"] {{ display: none !important; }}
+        header[data-testid="stHeader"] {{
+            background: transparent !important;
+            border-bottom: none !important;
+        }}
+
         .block-container {{
-            padding: 1.8rem 2.4rem 4rem !important;
+            padding: 1.2rem 2.0rem 3rem !important;
             max-width: 1560px !important;
             animation: fadeInUp 0.35s ease both;
         }}
@@ -201,10 +208,12 @@ def inject_global_css():
             border-left-color: rgba(245,158,11,0.5) !important;
         }}
         section[data-testid="stSidebar"] [data-testid="stPageLink"] a[aria-current="page"] {{
-            color: #F59E0B !important;
-            background: rgba(245,158,11,0.10) !important;
+            color: #FCD34D !important;
+            background: rgba(245,158,11,0.16) !important;
+            border-left: 3px solid #F59E0B !important;
             border-left-color: #F59E0B !important;
-            font-weight: 600 !important;
+            font-weight: 700 !important;
+            box-shadow: inset 4px 0 14px rgba(245,158,11,0.07) !important;
         }}
 
         /* ═══════════════════════════════════════════════════════════════════
@@ -216,7 +225,7 @@ def inject_global_css():
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(245,158,11,0.14);
             border-top: 2px solid {_AMBER};
-            padding: 18px 20px 16px;
+            padding: 12px 16px 10px;
             border-radius: 8px;
             box-shadow: 0 4px 24px rgba(0,0,0,0.40), 0 0 0 0 rgba(245,158,11,0);
             transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
@@ -424,7 +433,7 @@ def inject_global_css():
         hr {{
             border: none !important;
             border-top: 1px solid rgba(245,158,11,0.10) !important;
-            margin: 1.8rem 0 !important;
+            margin: 1.0rem 0 !important;
         }}
 
         /* ═══════════════════════════════════════════════════════════════════
@@ -442,21 +451,29 @@ def inject_global_css():
             padding: 12px 14px 4px 16px;
         }}
 
-        /* General page links outside sidebar — keep a subtle card style */
+        /* General page links outside sidebar — compact terminal card style */
+        [data-testid="stPageLink"] {{
+            margin-bottom: 2px !important;
+        }}
         [data-testid="stPageLink"] a {{
-            border: 1px solid rgba(245,158,11,0.18) !important;
-            border-radius: 7px !important;
-            padding: 9px 14px !important;
-            background: rgba(13,20,33,0.80) !important;
+            border: 1px solid rgba(245,158,11,0.12) !important;
+            border-radius: 4px !important;
+            padding: 5px 10px !important;
+            background: rgba(13,20,33,0.75) !important;
             display: block !important;
-            transition: all 0.15s ease !important;
+            transition: all 0.14s ease !important;
             font-family: 'JetBrains Mono', monospace !important;
-            font-size: 0.78rem !important;
-            font-weight: 600 !important;
+            font-size: 0.70rem !important;
+            font-weight: 500 !important;
+            color: #64748B !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
         }}
         [data-testid="stPageLink"] a:hover {{
-            border-color: {_AMBER} !important;
-            background: rgba(245,158,11,0.08) !important;
+            border-color: rgba(245,158,11,0.35) !important;
+            background: rgba(245,158,11,0.07) !important;
+            color: {_AMBER} !important;
         }}
 
         /* ═══════════════════════════════════════════════════════════════════
@@ -467,13 +484,13 @@ def inject_global_css():
                 radial-gradient(ellipse at 20% 0%, rgba(245,158,11,0.08) 0%, transparent 60%),
                 radial-gradient(ellipse at 80% 100%, rgba(6,182,212,0.05) 0%, transparent 55%),
                 linear-gradient(160deg, #060B14 0%, #0A1020 40%, #080E1A 100%);
-            padding: 30px 38px;
+            padding: 14px 24px;
             border-radius: 10px;
             border: 1px solid rgba(245,158,11,0.18);
             border-top: 1px solid rgba(245,158,11,0.35);
             box-shadow: 0 24px 64px rgba(0,0,0,0.60),
                         0 0 0 1px rgba(245,158,11,0.05);
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             position: relative;
             overflow: hidden;
             animation: fadeInUp 0.40s ease both;
@@ -490,21 +507,21 @@ def inject_global_css():
         }}
 
         .hero-eyebrow {{
-            font-size: 0.62rem;
+            font-size: 0.58rem;
             font-weight: 700;
             color: {_AMBER};
             letter-spacing: 0.20em;
             text-transform: uppercase;
             font-family: 'JetBrains Mono', monospace;
-            margin-bottom: 8px;
+            margin-bottom: 3px;
             opacity: 0.80;
         }}
 
         .hero-title {{
-            font-size: 1.85rem;
+            font-size: 1.40rem;
             font-weight: 900;
             letter-spacing: -0.025em;
-            margin-bottom: 6px;
+            margin-bottom: 3px;
             line-height: 1.12;
             background: linear-gradient(95deg, {_TEXT_PRI} 0%, {_AMBER} 55%, {_CYAN} 100%);
             -webkit-background-clip: text;
@@ -514,8 +531,8 @@ def inject_global_css():
 
         .hero-subtitle {{
             color: {_TEXT_SEC};
-            font-size: 0.875rem;
-            line-height: 1.65;
+            font-size: 0.78rem;
+            line-height: 1.40;
             max-width: 620px;
             opacity: 0.75;
         }}
@@ -539,8 +556,8 @@ def inject_global_css():
                 rgba(245,158,11,0.08) 0%, transparent 100%);
             border-left: 3px solid {_AMBER};
             border-radius: 0 7px 7px 0;
-            padding: 7px 16px;
-            margin: 14px 0 8px;
+            padding: 5px 14px;
+            margin: 8px 0 4px;
             animation: fadeIn 0.3s ease both;
         }}
 
@@ -681,8 +698,8 @@ def inject_global_css():
             background: rgba(245,158,11,0.055);
             border: 1px solid rgba(245,158,11,0.18);
             border-radius: 8px;
-            padding: 16px 22px;
-            margin-top: 12px;
+            padding: 10px 16px;
+            margin-top: 6px;
             animation: fadeIn 0.3s ease both;
         }}
 
@@ -1236,12 +1253,37 @@ def setup_page(title, subtitle="", icon="📊"):
     render_sidebar_nav()
     market_ticker()
 
+    _mkt_open  = _market_is_open()
+    _h_dot     = "#10B981" if _mkt_open else "#EF4444"
+    _h_mkt     = "OPEN" if _mkt_open else "CLOSED"
+    _h_kill    = st.session_state.get("kill_switch", False)
+    _h_syscol  = "#EF4444" if _h_kill else "#10B981"
+    _h_syslbl  = "CRITICAL" if _h_kill else "NORMAL"
+    try:
+        _h_et   = pytz.timezone("America/New_York")
+        _h_time = datetime.now(_h_et).strftime("%H:%M ET")
+    except Exception:
+        _h_time = datetime.now().strftime("%H:%M")
+
     st.markdown(
         f"""
         <div class="hero-card">
             <div class="hero-eyebrow">LIVE QUANT TERMINAL · PYTHON · STREAMLIT</div>
             <div class="hero-title">{icon} {title}<span class="term-cursor"></span></div>
             <div class="hero-subtitle">{subtitle}</div>
+            <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+                margin-top:8px;padding-top:7px;border-top:1px solid rgba(245,158,11,0.08);">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:0.60rem;
+                    color:{_h_dot};font-weight:700;display:inline-flex;align-items:center;gap:5px;">
+                    <span style="width:6px;height:6px;border-radius:50%;background:{_h_dot};
+                        box-shadow:0 0 6px {_h_dot};display:inline-block;flex-shrink:0;"></span>
+                    NYSE {_h_mkt}
+                </span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:0.60rem;color:#475569;">⏱ {_h_time}</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:0.60rem;color:#334155;">DATA: YAHOO FINANCE</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:0.60rem;
+                    color:{_h_syscol};font-weight:700;">SYS: {_h_syslbl}</span>
+            </div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -1275,89 +1317,65 @@ def next_step(text):
 
 
 def nav_hub():
-    """Full navigation grid rendered on the dashboard — replaces sidebar nav."""
+    """Compact 4-column navigation grid for the dashboard."""
     _sections = [
-        ("📡 Market Intelligence", _CYAN, [
-            ("pages/2_Market_Prices.py",  "Market Prices",  "Live equity, index & crypto prices"),
-            ("pages/4_Market_News.py",    "Market News",    "Financial headlines & RSS feed"),
-            ("pages/6_Daily_Picks.py",    "Daily Picks",    "Momentum-based stock picks"),
-            ("pages/17_Market_Regime.py", "Market Regime",  "Bull / Bear / Stress classification"),
-            ("pages/3_Market_Anomalies.py","Anomalies",     "Cost-aware anomaly signals"),
+        ("📡 Market Intel", _CYAN, [
+            ("pages/2_Market_Prices.py",   "Market Prices"),
+            ("pages/4_Market_News.py",     "Market News"),
+            ("pages/6_Daily_Picks.py",     "Daily Picks"),
+            ("pages/17_Market_Regime.py",  "Market Regime"),
+            ("pages/3_Market_Anomalies.py","Anomalies"),
         ]),
         ("🔬 Alpha Research", _AMBER, [
-            ("pages/20_Pairs_Trading.py",       "Pairs Trading",    "Cointegration & stat-arb pairs"),
-            ("pages/1_backtest.py",             "Backtest Engine",  "Historical strategy backtesting"),
-            ("pages/22_Factor_Research.py",     "Factor Research",  "Multi-factor equity scoring"),
-            ("pages/23_ML_Alpha_Lab.py",        "ML Alpha Lab",     "RF / GBM / LR signal generation"),
-            ("pages/24_News_Sentiment.py",      "News Sentiment",   "Google News RSS sentiment scoring"),
+            ("pages/20_Pairs_Trading.py",      "Pairs Trading"),
+            ("pages/1_backtest.py",            "Backtest Engine"),
+            ("pages/22_Factor_Research.py",    "Factor Research"),
+            ("pages/23_ML_Alpha_Lab.py",       "ML Alpha Lab"),
+            ("pages/24_News_Sentiment.py",     "News Sentiment"),
         ]),
-        ("📊 Portfolio", _GREEN, [
-            ("pages/16_Portfolio_Optimizer.py", "Optimizer","Mean-variance & risk-parity"),
-            ("pages/7_watchlist.py",      "Watchlist",      "Track symbols & set price alerts"),
+        ("📊 Portfolio  ·  🛡️ Risk", _GREEN, [
+            ("pages/16_Portfolio_Optimizer.py","Optimizer"),
+            ("pages/7_watchlist.py",           "Watchlist"),
+            ("pages/10_RiskEngine.py",         "Risk Engine"),
+            ("pages/18_VaR_CVaR_Risk.py",      "VaR / CVaR"),
+            ("pages/11_MonteCarlo.py",         "Monte Carlo"),
         ]),
-        ("🛡️ Risk Management", _RED, [
-            ("pages/10_RiskEngine.py",    "Risk Engine",    "Drawdown, vol & kill-switch"),
-            ("pages/18_VaR_CVaR_Risk.py", "VaR / CVaR",    "Value-at-Risk & tail risk"),
-            ("pages/11_MonteCarlo.py",    "Monte Carlo",    "Forward scenario simulation"),
-        ]),
-        ("⚡ Execution", _AMBER, [
-            ("pages/5_Trading_Sim.py",    "Trading Sim",    "Paper trading broker"),
-            ("pages/8_Execution.py",      "TWAP / VWAP",    "Algorithmic execution algos"),
-            ("pages/21_Order_Book_Microstructure.py", "Order Book", "LOB microstructure sim"),
-        ]),
-        ("📈 Monitoring", _GREEN, [
-            ("pages/9_performance.py",    "Performance",    "Equity curve & trade blotter"),
-            ("pages/15_Alerts.py",        "Alerts",         "Risk threshold notifications"),
-            ("pages/14_Trading_Bot.py",   "Trading Bot",    "Automated signal generation"),
-        ]),
-        ("🧬 Advanced", _CYAN, [
-            ("pages/12_Strategy_DNA.py",          "Strategy DNA",      "Behavioural strategy fingerprint"),
-            ("pages/13_Counterfactual_Replay.py", "Counterfactual",    "What-if trade replay"),
-            ("pages/19_Options_Pricing.py",       "Options Pricing",   "Black-Scholes & Greeks"),
+        ("⚡ Execution  ·  📈 Ops", _RED, [
+            ("pages/5_Trading_Sim.py",    "Trading Sim"),
+            ("pages/8_Execution.py",      "TWAP / VWAP"),
+            ("pages/21_Order_Book_Microstructure.py","Order Book"),
+            ("pages/9_performance.py",    "Performance"),
+            ("pages/15_Alerts.py",        "Alerts"),
+            ("pages/14_Trading_Bot.py",   "Trading Bot"),
+            ("pages/12_Strategy_DNA.py",          "Strategy DNA"),
+            ("pages/13_Counterfactual_Replay.py", "Counterfactual"),
+            ("pages/19_Options_Pricing.py",        "Options Pricing"),
+            ("pages/25_Live_Signal_Dashboard.py",  "Live Signals"),
+            ("pages/26_Strategy_Comparison.py",    "Compare Strategies"),
         ]),
     ]
 
     st.markdown(
-        f'<p style="font-family:\'JetBrains Mono\',monospace;font-size:0.62rem;'
+        f'<p style="font-family:\'JetBrains Mono\',monospace;font-size:0.58rem;'
         f'font-weight:800;color:{_AMBER};text-transform:uppercase;'
-        f'letter-spacing:0.18em;margin:28px 0 14px;">Platform Navigation</p>',
+        f'letter-spacing:0.18em;margin:14px 0 8px;">Platform Navigation</p>',
         unsafe_allow_html=True,
     )
 
-    # Render two columns of sections
-    left_sections  = _sections[:4]
-    right_sections = _sections[4:]
-    col_l, col_r   = st.columns(2)
-
-    for col, section_group in ((col_l, left_sections), (col_r, right_sections)):
+    cols = st.columns(4)
+    for col, (sec_label, accent, pages) in zip(cols, _sections):
         with col:
-            for sec_label, accent, pages in section_group:
-                st.markdown(
-                    f"""
-                    <div style="
-                        border-left: 3px solid {accent};
-                        padding: 6px 0 6px 12px;
-                        margin: 16px 0 6px;
-                        font-family: 'JetBrains Mono', monospace;
-                        font-size: 0.68rem;
-                        font-weight: 800;
-                        color: {accent};
-                        text-transform: uppercase;
-                        letter-spacing: 0.14em;
-                    ">{sec_label}</div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-                for path, label, desc in pages:
-                    link_col, desc_col = st.columns([1, 1.6])
-                    with link_col:
-                        st.page_link(path, label=label)
-                    with desc_col:
-                        st.markdown(
-                            f'<span style="font-size:0.68rem;color:{_TEXT_MUT};'
-                            f'font-family:Inter,sans-serif;line-height:2.2;">{desc}</span>',
-                            unsafe_allow_html=True,
-                        )
+            st.markdown(
+                f'<div style="border-top:2px solid {accent};padding:5px 8px 4px;'
+                f'margin-bottom:4px;font-family:\'JetBrains Mono\',monospace;'
+                f'font-size:0.54rem;font-weight:800;color:{accent};'
+                f'text-transform:uppercase;letter-spacing:0.11em;'
+                f'background:rgba(13,20,33,0.65);border-radius:0 0 3px 3px;">'
+                f'{sec_label}</div>',
+                unsafe_allow_html=True,
+            )
+            for path, label in pages:
+                st.page_link(path, label=label)
 
 
 def status_badge(label, status):

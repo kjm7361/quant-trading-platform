@@ -1,8 +1,9 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import plotly.graph_objects as go
 
-from components.layout import setup_page, section, next_step
+from components.layout import setup_page, section, next_step, plotly_config
 
 
 # =============================
@@ -46,7 +47,25 @@ returns = safe_series(strategy_returns)
 equity = safe_series(equity_curve)
 
 if len(equity) == 0:
-    st.warning("No portfolio data found. Run the Trading Sim, Backtest, or Performance page first.")
+    st.info("No simulation data yet. Run **Trading Sim** or **Backtest** to populate portfolio analytics.")
+
+    @st.cache_data(ttl=300)
+    def _al_fallback_mkt():
+        try:
+            from market.prices import fetch_latest_prices
+            return fetch_latest_prices(["SPY", "QQQ", "IWM", "^VIX"], period="5d", interval="1d")
+        except Exception:
+            return pd.DataFrame()
+
+    from components.layout import section
+    section("Market Overview", "Live benchmark data while waiting for simulation results.")
+    _fb = _al_fallback_mkt()
+    if not _fb.empty:
+        _fb_cols = st.columns(len(_fb))
+        for _fc, (_tkr, _row) in zip(_fb_cols, _fb.iterrows()):
+            _price_str = f"${_row['price']:,.2f}" if _row["price"] < 1000 else f"${_row['price']:,.0f}"
+            _fc.metric(_tkr, _price_str, f"{_row['pct_change']:+.2f}%")
+    st.page_link("pages/5_Trading_Sim.py", label="→ Go to Trading Sim", icon="💹")
     st.stop()
 
 drawdown = compute_drawdown(equity)
@@ -271,14 +290,26 @@ section(
     "Portfolio equity, drawdown, and rolling volatility monitoring."
 )
 
-chart_df = pd.DataFrame({
-    "Equity": equity
-})
+fig = go.Figure()
+fig.add_trace(go.Scatter(
+    x=list(range(len(equity))),
+    y=equity.values.tolist(),
+    mode="lines",
+    name="Equity",
+    line=dict(color="#10b981", width=2)
+))
 
 if len(drawdown) > 0:
-    chart_df["Drawdown"] = drawdown
+    fig.add_trace(go.Scatter(
+        x=list(range(len(drawdown))),
+        y=drawdown.values.tolist(),
+        mode="lines",
+        name="Drawdown",
+        line=dict(color="#ef4444", width=2)
+    ))
 
-st.line_chart(chart_df)
+fig.update_layout(title="Portfolio Monitoring", xaxis_title="Period", yaxis_title="Value", **plotly_config())
+st.plotly_chart(fig, use_container_width=True)
 
 if len(returns) > 0:
     vol_series = returns.rolling(rolling_window).std().dropna()
@@ -291,7 +322,15 @@ if len(returns) > 0:
             "Recent realized volatility over the selected rolling window."
         )
 
-        st.line_chart(vol_series)
+        fig_vol = go.Figure(go.Scatter(
+            x=list(range(len(vol_series))),
+            y=vol_series.values.tolist(),
+            mode="lines",
+            name="Rolling Volatility",
+            line=dict(color="#f59e0b", width=2)
+        ))
+        fig_vol.update_layout(title="Rolling Volatility", xaxis_title="Period", yaxis_title="Volatility", **plotly_config())
+        st.plotly_chart(fig_vol, use_container_width=True)
 
 st.divider()
 

@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Environment
+.env
+.venv
+venv/
+env/
+
+# Runtime / generated data
+storage/session_cache.json
+storage/sim_trading.db
+storage/users.csv
+
+# IDE
+.idea/
+.vscode/
+*.swp

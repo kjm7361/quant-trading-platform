@@ -94,3 +94,26 @@ def fetch_latest_prices(tickers, period="5d", interval="1d"):
     out = out.sort_values("pct_change", ascending=False)
 
     return out
+
+
+def get_live_price(symbol: str):
+    """Return the most recent trade price for a single ticker, or None on failure."""
+    symbol = str(symbol).strip().upper()
+    try:
+        t = yf.Ticker(symbol)
+        price = t.fast_info.last_price
+        if price is not None and price == price:   # nan guard
+            return float(price)
+    except Exception:
+        pass
+    try:
+        df = fetch_latest_prices([symbol], period="2d", interval="1d")
+        if not df.empty:
+            return float(df["price"].iloc[0])
+    except Exception:
+        pass
+    return None
+
+
+# Back-compat alias: Trading Sim probes for this via hasattr(prices, "get_latest_price")
+get_latest_price = get_live_price

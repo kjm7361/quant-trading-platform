@@ -1,9 +1,9 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 
-from components.layout import setup_page, section, next_step
+from components.layout import setup_page, section, next_step, plotly_config
 
 
 # =============================
@@ -23,8 +23,32 @@ strategy_returns = st.session_state.get("strategy_returns", None)
 equity_curve = st.session_state.get("equity_curve", None)
 initial_capital = st.session_state.get("initial_capital", 100000.0)
 
-if strategy_returns is None or equity_curve is None or len(equity_curve) == 0:
-    st.warning("No portfolio data found. Run the Trading Sim, Backtest, or Performance page first.")
+_has_sim = (
+    strategy_returns is not None
+    and equity_curve is not None
+    and len(equity_curve) >= 2
+)
+
+if not _has_sim:
+    st.info("No simulation data yet. Run **Trading Sim** or **Backtest** to populate portfolio analytics.")
+
+    @st.cache_data(ttl=300)
+    def _mc_fallback_mkt():
+        try:
+            from market.prices import fetch_latest_prices
+            return fetch_latest_prices(["SPY", "QQQ", "IWM", "^VIX"], period="5d", interval="1d")
+        except Exception:
+            return pd.DataFrame()
+
+    from components.layout import section
+    section("Market Overview", "Live benchmark data while waiting for simulation results.")
+    _fb = _mc_fallback_mkt()
+    if not _fb.empty:
+        _fb_cols = st.columns(len(_fb))
+        for _fc, (_tkr, _row) in zip(_fb_cols, _fb.iterrows()):
+            _price_str = f"${_row['price']:,.2f}" if _row["price"] < 1000 else f"${_row['price']:,.0f}"
+            _fc.metric(_tkr, _price_str, f"{_row['pct_change']:+.2f}%")
+    st.page_link("pages/5_Trading_Sim.py", label="→ Go to Trading Sim", icon="💹")
     st.stop()
 
 returns = pd.Series(strategy_returns).dropna()
@@ -147,20 +171,26 @@ st.divider()
 # =============================
 section("Simulated Portfolio Paths", "A sample of possible future portfolio trajectories.")
 
-fig1, ax1 = plt.subplots(figsize=(12, 5))
-
 paths_to_show = min(100, num_simulations)
+x_days = list(range(forecast_days + 1))
 
-ax1.plot(
-    simulated_paths[:, :paths_to_show],
-    alpha=0.35
-)
+color_palette = ["#10b981", "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4"]
 
-ax1.set_xlabel("Days")
-ax1.set_ylabel("Portfolio Value")
-ax1.set_title("Monte Carlo Simulated Paths")
+fig1 = go.Figure()
+i = 0
+while i < paths_to_show:
+    fig1.add_trace(go.Scatter(
+        x=x_days,
+        y=simulated_paths[:, i].tolist(),
+        mode="lines",
+        line=dict(color=color_palette[i % len(color_palette)], width=1),
+        opacity=0.35,
+        showlegend=False
+    ))
+    i += 1
 
-st.pyplot(fig1)
+fig1.update_layout(title="Monte Carlo Simulated Paths", xaxis_title="Days", yaxis_title="Portfolio Value", **plotly_config())
+st.plotly_chart(fig1, use_container_width=True)
 
 st.divider()
 
@@ -170,37 +200,18 @@ st.divider()
 # =============================
 section("Ending Value Distribution", "Distribution of final portfolio values at the end of the forecast horizon.")
 
-fig2, ax2 = plt.subplots(figsize=(12, 5))
+fig2 = go.Figure(go.Histogram(
+    x=ending_values,
+    nbinsx=40,
+    marker_color="#10b981"
+))
 
-ax2.hist(
-    ending_values,
-    bins=40
-)
+fig2.add_vline(x=current_value, line_dash="dash", line_color="#94a3b8", annotation_text="Current Value")
+fig2.add_vline(x=p5, line_dash="dash", line_color="#ef4444", annotation_text="5th Percentile")
+fig2.add_vline(x=p95, line_dash="dash", line_color="#3b82f6", annotation_text="95th Percentile")
 
-ax2.axvline(
-    current_value,
-    linestyle="--",
-    label="Current Value"
-)
-
-ax2.axvline(
-    p5,
-    linestyle="--",
-    label="5th Percentile"
-)
-
-ax2.axvline(
-    p95,
-    linestyle="--",
-    label="95th Percentile"
-)
-
-ax2.set_xlabel("Ending Portfolio Value")
-ax2.set_ylabel("Frequency")
-ax2.set_title("Distribution of Ending Values")
-ax2.legend()
-
-st.pyplot(fig2)
+fig2.update_layout(title="Distribution of Ending Values", xaxis_title="Ending Portfolio Value", yaxis_title="Frequency", **plotly_config())
+st.plotly_chart(fig2, use_container_width=True)
 
 st.divider()
 

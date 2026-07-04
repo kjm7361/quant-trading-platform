@@ -2,8 +2,9 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import yfinance as yf
+import plotly.graph_objects as go
 
-from components.layout import setup_page, section, next_step
+from components.layout import setup_page, section, next_step, plotly_config
 
 from execution.sim_broker import list_trades
 
@@ -745,7 +746,23 @@ eq_compare = pd.DataFrame({
     "Counterfactual": counter_eq
 }).dropna(how="all")
 
-st.line_chart(eq_compare)
+fig = go.Figure()
+fig.add_trace(go.Scatter(
+    x=eq_compare.index.tolist(),
+    y=eq_compare["Actual"].tolist(),
+    mode="lines",
+    name="Actual",
+    line=dict(color="#10b981", width=2)
+))
+fig.add_trace(go.Scatter(
+    x=eq_compare.index.tolist(),
+    y=eq_compare["Counterfactual"].tolist(),
+    mode="lines",
+    name="Counterfactual",
+    line=dict(color="#3b82f6", width=2)
+))
+fig.update_layout(title="Equity Curve Comparison", xaxis_title="Date", yaxis_title="Portfolio Value", **plotly_config())
+st.plotly_chart(fig, use_container_width=True)
 
 st.divider()
 

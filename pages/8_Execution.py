@@ -2,9 +2,9 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import yfinance as yf
-import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 
-from components.layout import setup_page, section, next_step
+from components.layout import setup_page, section, next_step, plotly_config
 
 
 # =============================
@@ -597,31 +597,23 @@ section(
 
 exec_points = sim_result[sim_result["shares"] > 0].copy()
 
-fig1, ax1 = plt.subplots(figsize=(12, 5))
-
-ax1.plot(df.index, df["Close"], label="Market Price")
-
+fig1 = go.Figure()
+fig1.add_trace(go.Scatter(x=df.index, y=df["Close"], mode="lines",
+                          name="Market Price", line=dict(color="#10b981", width=2)))
 if not exec_points.empty:
-
-    ax1.scatter(
-        df.index[exec_points["step"]],
-        exec_points["exec_price"],
-        s=np.maximum(
-            exec_points["shares"]
-            / max(exec_points["shares"].max(), 1)
-            * 200,
-            30
-        ),
-        alpha=0.7,
-        label="Execution Points"
+    marker_sizes = np.maximum(
+        exec_points["shares"] / max(exec_points["shares"].max(), 1) * 20, 8
     )
-
-ax1.set_title(f"{symbol} Market Price vs Execution Prices")
-ax1.set_xlabel("Time")
-ax1.set_ylabel("Price")
-ax1.legend()
-
-st.pyplot(fig1)
+    fig1.add_trace(go.Scatter(
+        x=df.index[exec_points["step"]],
+        y=exec_points["exec_price"],
+        mode="markers",
+        name="Execution Points",
+        marker=dict(color="#f59e0b", size=marker_sizes, opacity=0.8),
+    ))
+fig1.update_layout(title=f"{symbol} Market Price vs Execution Prices",
+                   xaxis_title="Time", yaxis_title="Price", **plotly_config())
+st.plotly_chart(fig1, use_container_width=True)
 
 st.divider()
 
@@ -634,15 +626,11 @@ section(
     "Shares traded per execution interval."
 )
 
-fig2, ax2 = plt.subplots(figsize=(12, 4))
-
-ax2.bar(range(len(shares_schedule)), shares_schedule)
-
-ax2.set_title("Shares Traded Per Bar")
-ax2.set_xlabel("Bar")
-ax2.set_ylabel("Shares")
-
-st.pyplot(fig2)
+fig2 = go.Figure(go.Bar(x=list(range(len(shares_schedule))), y=shares_schedule,
+                        marker_color="#3b82f6"))
+fig2.update_layout(title="Shares Traded Per Bar", xaxis_title="Bar", yaxis_title="Shares",
+                   **plotly_config())
+st.plotly_chart(fig2, use_container_width=True)
 
 st.divider()
 
@@ -655,15 +643,11 @@ section(
     "Track cumulative execution cost through time."
 )
 
-fig3, ax3 = plt.subplots(figsize=(12, 4))
-
-ax3.plot(sim_result["step"], sim_result["cum_cost"])
-
-ax3.set_title("Cumulative Cost Through Time")
-ax3.set_xlabel("Bar")
-ax3.set_ylabel("Cumulative Cost")
-
-st.pyplot(fig3)
+fig3 = go.Figure(go.Scatter(x=sim_result["step"], y=sim_result["cum_cost"],
+                            mode="lines", line=dict(color="#10b981", width=2)))
+fig3.update_layout(title="Cumulative Cost Through Time", xaxis_title="Bar",
+                   yaxis_title="Cumulative Cost", **plotly_config())
+st.plotly_chart(fig3, use_container_width=True)
 
 st.divider()
 
@@ -678,19 +662,13 @@ section(
 
 impact_only = sim_result[sim_result["shares"] > 0].copy()
 
-fig4, ax4 = plt.subplots(figsize=(12, 4))
-
+fig4 = go.Figure()
 if not impact_only.empty:
-    ax4.bar(
-        impact_only["step"],
-        impact_only["impact_per_share"]
-    )
-
-ax4.set_title("Execution Premium / Discount vs Market Price")
-ax4.set_xlabel("Bar")
-ax4.set_ylabel("Impact Per Share")
-
-st.pyplot(fig4)
+    fig4.add_trace(go.Bar(x=impact_only["step"], y=impact_only["impact_per_share"],
+                          marker_color="#ef4444"))
+fig4.update_layout(title="Execution Premium / Discount vs Market Price",
+                   xaxis_title="Bar", yaxis_title="Impact Per Share", **plotly_config())
+st.plotly_chart(fig4, use_container_width=True)
 
 st.divider()
 

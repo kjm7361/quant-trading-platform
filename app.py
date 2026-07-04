@@ -945,7 +945,7 @@ with v1:
             xaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
             yaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
             showlegend=False, height=220,
-        ),
+        )
     )
     st.plotly_chart(preview_fig, use_container_width=True, config={"displayModeBar": False})
 

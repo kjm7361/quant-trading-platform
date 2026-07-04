@@ -1,9 +1,9 @@
 import streamlit as st
 import pandas as pd
 import yfinance as yf
-import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 
-from components.layout import setup_page, section, next_step
+from components.layout import setup_page, section, next_step, plotly_config
 
 from recommendations.daily_pick import compute_daily_scores
 
@@ -181,12 +181,11 @@ for row in top.itertuples(index=False):
     series = close_prices[ticker].dropna()
 
     with cols[i % 2]:
-        fig, ax = plt.subplots(figsize=(8, 4))
-        ax.plot(series)
-        ax.set_title(ticker)
-        ax.set_xlabel("Date")
-        ax.set_ylabel("Close Price")
-        st.pyplot(fig)
+        fig = go.Figure(go.Scatter(x=series.index, y=series.values, mode="lines",
+                                   line=dict(color="#10b981", width=2)))
+        fig.update_layout(title=ticker, xaxis_title="Date", yaxis_title="Close Price",
+                          **plotly_config())
+        st.plotly_chart(fig, use_container_width=True)
 
     i += 1
 

@@ -1,8 +1,9 @@
 import streamlit as st
 import yfinance as yf
 import pandas as pd
+import plotly.graph_objects as go
 
-from components.layout import setup_page, section, next_step
+from components.layout import setup_page, section, next_step, plotly_config
 
 from core.bot import TradingBot
 from execution.sim_broker import place_market_order, get_cash
@@ -198,7 +199,30 @@ chart_df = pd.DataFrame({
     "Long MA": df["long_ma"]
 })
 
-st.line_chart(chart_df)
+fig = go.Figure()
+fig.add_trace(go.Scatter(
+    x=chart_df.index.tolist(),
+    y=chart_df["Price"].tolist(),
+    mode="lines",
+    name="Price",
+    line=dict(color="#10b981", width=2)
+))
+fig.add_trace(go.Scatter(
+    x=chart_df.index.tolist(),
+    y=chart_df["Short MA"].tolist(),
+    mode="lines",
+    name="Short MA",
+    line=dict(color="#3b82f6", width=1)
+))
+fig.add_trace(go.Scatter(
+    x=chart_df.index.tolist(),
+    y=chart_df["Long MA"].tolist(),
+    mode="lines",
+    name="Long MA",
+    line=dict(color="#f59e0b", width=1)
+))
+fig.update_layout(title="Price + Moving Averages", xaxis_title="Date", yaxis_title="Price", **plotly_config())
+st.plotly_chart(fig, use_container_width=True)
 
 st.divider()
 

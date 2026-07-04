@@ -1,9 +1,9 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 
-from components.layout import setup_page, section, next_step
+from components.layout import setup_page, section, next_step, plotly_config
 
 
 # =============================
@@ -169,17 +169,34 @@ def signal_message(signal):
 # =============================
 st.sidebar.header("Order Book Settings")
 
+# Real-parameter seed from Yahoo Finance
+_ob_ticker = st.sidebar.text_input("Ticker to Seed", value="AAPL", key="ob_ticker")
+if st.sidebar.button("Fetch Real Parameters"):
+    try:
+        import yfinance as yf
+        _fi = yf.Ticker(_ob_ticker.strip().upper()).fast_info
+        _mid_v = _fi.last_price
+        _spread_v = max(0.01, (_fi.day_high - _fi.day_low) * 0.015)
+        _base_v = max(100.0, (_fi.three_month_average_volume or 1_000_000) / 1000)
+        if _mid_v is not None and _mid_v == _mid_v:
+            st.session_state["ob_mid"]    = float(_mid_v)
+            st.session_state["ob_spread"] = float(_spread_v)
+            st.session_state["ob_base"]   = float(_base_v)
+            st.sidebar.success(f"mid=${_mid_v:,.2f}  spread=${_spread_v:.3f}")
+    except Exception:
+        st.sidebar.warning("Fetch failed — using manual inputs.")
+
 mid_price = st.sidebar.number_input(
     "Mid Price",
     min_value=1.0,
-    value=100.0,
+    value=float(st.session_state.get("ob_mid", 100.0)),
     step=1.0
 )
 
 spread = st.sidebar.number_input(
     "Bid-Ask Spread",
     min_value=0.01,
-    value=0.10,
+    value=float(st.session_state.get("ob_spread", 0.10)),
     step=0.01
 )
 
@@ -201,7 +218,7 @@ tick_size = st.sidebar.number_input(
 base_size = st.sidebar.number_input(
     "Base Level Size",
     min_value=10.0,
-    value=1000.0,
+    value=float(st.session_state.get("ob_base", 1000.0)),
     step=50.0
 )
 
@@ -371,29 +388,16 @@ depth_df = pd.DataFrame({
     "Ask Size": book["Ask Size"]
 })
 
-fig1, ax1 = plt.subplots(figsize=(11, 5))
-
-ax1.bar(
-    depth_df["Bid Price"],
-    depth_df["Bid Size"],
-    width=tick_size * 0.8,
-    label="Bid Size"
-)
-
-ax1.bar(
-    depth_df["Ask Price"],
-    depth_df["Ask Size"],
-    width=tick_size * 0.8,
-    label="Ask Size"
-)
-
-ax1.axvline(metrics["Mid Price"], linestyle="--", label="Mid Price")
-ax1.set_title("Order Book Depth")
-ax1.set_xlabel("Price")
-ax1.set_ylabel("Size")
-ax1.legend()
-
-st.pyplot(fig1)
+fig1 = go.Figure()
+fig1.add_trace(go.Bar(x=depth_df["Bid Price"], y=depth_df["Bid Size"],
+                      name="Bid Size", marker_color="#10b981", width=tick_size * 0.8))
+fig1.add_trace(go.Bar(x=depth_df["Ask Price"], y=depth_df["Ask Size"],
+                      name="Ask Size", marker_color="#ef4444", width=tick_size * 0.8))
+fig1.add_vline(x=metrics["Mid Price"], line_dash="dash", line_color="#94a3b8",
+               annotation_text="Mid Price", annotation_position="top right")
+fig1.update_layout(title="Order Book Depth", xaxis_title="Price", yaxis_title="Size",
+                   barmode="overlay", **plotly_config())
+st.plotly_chart(fig1, use_container_width=True)
 
 st.divider()
 
@@ -409,12 +413,16 @@ section(
 cum_bid = book["Bid Size"].cumsum()
 cum_ask = book["Ask Size"].cumsum()
 
-cum_df = pd.DataFrame({
-    "Bid Cumulative Depth": cum_bid,
-    "Ask Cumulative Depth": cum_ask
-})
-
-st.line_chart(cum_df)
+fig2 = go.Figure()
+fig2.add_trace(go.Scatter(x=list(range(len(cum_bid))), y=cum_bid.values,
+                          mode="lines", name="Bid Cumulative Depth",
+                          line=dict(color="#10b981", width=2)))
+fig2.add_trace(go.Scatter(x=list(range(len(cum_ask))), y=cum_ask.values,
+                          mode="lines", name="Ask Cumulative Depth",
+                          line=dict(color="#ef4444", width=2)))
+fig2.update_layout(title="Cumulative Depth", xaxis_title="Level", yaxis_title="Cumulative Size",
+                   **plotly_config())
+st.plotly_chart(fig2, use_container_width=True)
 
 st.divider()
 

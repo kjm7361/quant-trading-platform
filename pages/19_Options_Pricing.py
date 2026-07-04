@@ -1,12 +1,12 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 from math import log, sqrt, exp
 from scipy.stats import norm
 from scipy.optimize import brentq
 
-from components.layout import setup_page, section, next_step
+from components.layout import setup_page, section, next_step, plotly_config
 
 
 # =============================
@@ -180,16 +180,29 @@ def option_payoff_range(S, K, premium, option_type):
 # =============================
 st.sidebar.header("Option Inputs")
 
+# Live spot price fetch
+_opt_ticker = st.sidebar.text_input("Ticker for Live Spot", value="AAPL", key="opt_ticker")
+if st.sidebar.button("Fetch Live Spot Price"):
+    try:
+        import yfinance as yf
+        _spot = yf.Ticker(_opt_ticker.strip().upper()).fast_info.last_price
+        if _spot is not None and _spot == _spot:
+            st.session_state["opt_spot"] = float(_spot)
+            st.sidebar.success(f"Fetched: ${_spot:,.2f}")
+    except Exception:
+        st.sidebar.warning("Fetch failed — enter price manually.")
+
 option_type = st.sidebar.selectbox(
     "Option Type",
     ["Call", "Put"],
     index=0
 )
 
+_spot_default = float(st.session_state.get("opt_spot", 100.0))
 S = st.sidebar.number_input(
     "Stock Price",
     min_value=1.0,
-    value=100.0,
+    value=_spot_default,
     step=1.0
 )
 
@@ -412,12 +425,11 @@ vol_df = pd.DataFrame({
     "Option Price": vol_prices
 })
 
-fig1, ax1 = plt.subplots(figsize=(11, 5))
-ax1.plot(vol_df["Volatility"], vol_df["Option Price"])
-ax1.set_title("Option Price vs Volatility")
-ax1.set_xlabel("Volatility")
-ax1.set_ylabel("Option Price")
-st.pyplot(fig1)
+fig1 = go.Figure(go.Scatter(x=vol_df["Volatility"], y=vol_df["Option Price"],
+                            mode="lines", line=dict(color="#10b981", width=2)))
+fig1.update_layout(title="Option Price vs Volatility", xaxis_title="Volatility",
+                   yaxis_title="Option Price", **plotly_config())
+st.plotly_chart(fig1, use_container_width=True)
 
 st.divider()
 
@@ -437,20 +449,15 @@ payoff_df = option_payoff_range(
     option_type
 )
 
-fig2, ax2 = plt.subplots(figsize=(11, 5))
-ax2.plot(
-    payoff_df["Underlying Price"],
-    payoff_df["Profit / Loss"]
-)
-
-ax2.axhline(0, linestyle="--")
-ax2.axvline(K, linestyle="--", label="Strike")
-ax2.set_title(f"{option_type} Option Payoff at Expiration")
-ax2.set_xlabel("Underlying Price at Expiration")
-ax2.set_ylabel("Profit / Loss")
-ax2.legend()
-
-st.pyplot(fig2)
+fig2 = go.Figure(go.Scatter(x=payoff_df["Underlying Price"], y=payoff_df["Profit / Loss"],
+                            mode="lines", line=dict(color="#3b82f6", width=2)))
+fig2.add_hline(y=0, line_dash="dash", line_color="#64748b")
+fig2.add_vline(x=K, line_dash="dash", line_color="#f59e0b",
+               annotation_text="Strike", annotation_position="top right")
+fig2.update_layout(title=f"{option_type} Option Payoff at Expiration",
+                   xaxis_title="Underlying Price at Expiration", yaxis_title="Profit / Loss",
+                   **plotly_config())
+st.plotly_chart(fig2, use_container_width=True)
 
 st.divider()
 
@@ -466,22 +473,18 @@ section(
 c1, c2 = st.columns(2)
 
 with c1:
-    fig3, ax3 = plt.subplots(figsize=(8, 4))
-    ax3.hist(terminal_prices, bins=50, alpha=0.75)
-    ax3.axvline(K, linestyle="--", label="Strike")
-    ax3.set_title("Simulated Terminal Stock Prices")
-    ax3.set_xlabel("Terminal Price")
-    ax3.set_ylabel("Frequency")
-    ax3.legend()
-    st.pyplot(fig3)
+    fig3 = go.Figure(go.Histogram(x=terminal_prices, nbinsx=50, marker_color="#3b82f6", opacity=0.75))
+    fig3.add_vline(x=K, line_dash="dash", line_color="#f59e0b",
+                   annotation_text="Strike", annotation_position="top right")
+    fig3.update_layout(title="Simulated Terminal Stock Prices", xaxis_title="Terminal Price",
+                       yaxis_title="Frequency", **plotly_config())
+    st.plotly_chart(fig3, use_container_width=True)
 
 with c2:
-    fig4, ax4 = plt.subplots(figsize=(8, 4))
-    ax4.hist(payoffs, bins=50, alpha=0.75)
-    ax4.set_title("Simulated Option Payoffs")
-    ax4.set_xlabel("Payoff")
-    ax4.set_ylabel("Frequency")
-    st.pyplot(fig4)
+    fig4 = go.Figure(go.Histogram(x=payoffs, nbinsx=50, marker_color="#10b981", opacity=0.75))
+    fig4.update_layout(title="Simulated Option Payoffs", xaxis_title="Payoff",
+                       yaxis_title="Frequency", **plotly_config())
+    st.plotly_chart(fig4, use_container_width=True)
 
 st.divider()
 

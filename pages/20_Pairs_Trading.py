@@ -2,10 +2,10 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import yfinance as yf
-import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 
 from statsmodels.tsa.stattools import coint
-from components.layout import setup_page, section, next_step
+from components.layout import setup_page, section, next_step, plotly_config
 
 
 # =============================
@@ -287,7 +287,23 @@ section(
 
 normalized = combined / combined.iloc[0]
 
-st.line_chart(normalized)
+fig_norm = go.Figure()
+fig_norm.add_trace(go.Scatter(
+    x=normalized.index.tolist(),
+    y=normalized[ticker1].tolist(),
+    mode="lines",
+    name=ticker1,
+    line=dict(color="#10b981", width=2)
+))
+fig_norm.add_trace(go.Scatter(
+    x=normalized.index.tolist(),
+    y=normalized[ticker2].tolist(),
+    mode="lines",
+    name=ticker2,
+    line=dict(color="#3b82f6", width=2)
+))
+fig_norm.update_layout(title="Normalized Pair Prices", xaxis_title="Date", yaxis_title="Normalized Price", **plotly_config())
+st.plotly_chart(fig_norm, use_container_width=True)
 
 st.divider()
 
@@ -300,14 +316,16 @@ section(
     "Mean-reversion spread between the two assets."
 )
 
-fig1, ax1 = plt.subplots(figsize=(11, 5))
-ax1.plot(spread.index, spread, label="Spread")
-ax1.axhline(spread.mean(), linestyle="--", label="Mean")
-ax1.set_title("Hedge-Ratio Adjusted Spread")
-ax1.set_xlabel("Date")
-ax1.set_ylabel("Spread")
-ax1.legend()
-st.pyplot(fig1)
+fig_spread = go.Figure(go.Scatter(
+    x=spread.index.tolist(),
+    y=spread.values.tolist(),
+    mode="lines",
+    name="Spread",
+    line=dict(color="#10b981", width=2)
+))
+fig_spread.add_hline(y=float(spread.mean()), line_dash="dash", line_color="#94a3b8", annotation_text="Mean")
+fig_spread.update_layout(title="Hedge-Ratio Adjusted Spread", xaxis_title="Date", yaxis_title="Spread", **plotly_config())
+st.plotly_chart(fig_spread, use_container_width=True)
 
 st.divider()
 
@@ -320,18 +338,20 @@ section(
     "Entry and exit signals based on spread deviation."
 )
 
-fig2, ax2 = plt.subplots(figsize=(11, 5))
-ax2.plot(zscore.index, zscore, label="Z-Score")
-ax2.axhline(entry_z, linestyle="--", label="Short Spread Entry")
-ax2.axhline(-entry_z, linestyle="--", label="Long Spread Entry")
-ax2.axhline(exit_z, linestyle=":", label="Exit")
-ax2.axhline(-exit_z, linestyle=":")
-ax2.axhline(0, linewidth=1)
-ax2.set_title("Spread Z-Score")
-ax2.set_xlabel("Date")
-ax2.set_ylabel("Z-Score")
-ax2.legend()
-st.pyplot(fig2)
+fig_z = go.Figure(go.Scatter(
+    x=zscore.index.tolist(),
+    y=zscore.values.tolist(),
+    mode="lines",
+    name="Z-Score",
+    line=dict(color="#10b981", width=2)
+))
+fig_z.add_hline(y=entry_z, line_dash="dash", line_color="#ef4444", annotation_text="Short Spread Entry")
+fig_z.add_hline(y=-entry_z, line_dash="dash", line_color="#3b82f6", annotation_text="Long Spread Entry")
+fig_z.add_hline(y=exit_z, line_dash="dot", line_color="#94a3b8", annotation_text="Exit")
+fig_z.add_hline(y=-exit_z, line_dash="dot", line_color="#94a3b8")
+fig_z.add_hline(y=0, line_color="#94a3b8", line_width=1)
+fig_z.update_layout(title="Spread Z-Score", xaxis_title="Date", yaxis_title="Z-Score", **plotly_config())
+st.plotly_chart(fig_z, use_container_width=True)
 
 st.divider()
 
@@ -367,7 +387,16 @@ b3.metric("Max Drawdown", f"{mdd*100:.2f}%")
 b4.metric("Signal Changes", str(trades))
 
 st.subheader("Strategy Equity Curve")
-st.line_chart(equity)
+
+fig_eq = go.Figure(go.Scatter(
+    x=equity.index.tolist(),
+    y=equity.values.tolist(),
+    mode="lines",
+    name="Equity",
+    line=dict(color="#10b981", width=2)
+))
+fig_eq.update_layout(title="Strategy Equity Curve", xaxis_title="Date", yaxis_title="Equity", **plotly_config())
+st.plotly_chart(fig_eq, use_container_width=True)
 
 st.divider()
 

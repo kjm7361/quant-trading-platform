@@ -2,9 +2,9 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import yfinance as yf
-import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 
-from components.layout import setup_page, section, next_step
+from components.layout import setup_page, section, next_step, plotly_config
 
 
 # =============================
@@ -330,13 +330,13 @@ with d1:
     )
 
 with d2:
-    fig_counts, ax_counts = plt.subplots(figsize=(10, 4))
-    ax_counts.bar(regime_counts["Regime"], regime_counts["Count"])
-    ax_counts.set_title("Regime Frequency")
-    ax_counts.set_xlabel("Regime")
-    ax_counts.set_ylabel("Observations")
-    plt.xticks(rotation=25)
-    st.pyplot(fig_counts)
+    fig_counts = go.Figure(go.Bar(
+        x=regime_counts["Regime"].tolist(),
+        y=regime_counts["Count"].tolist(),
+        marker_color="#10b981"
+    ))
+    fig_counts.update_layout(title="Regime Frequency", xaxis_title="Regime", yaxis_title="Observations", **plotly_config())
+    st.plotly_chart(fig_counts, use_container_width=True)
 
 st.divider()
 
@@ -351,7 +351,30 @@ section(
 
 price_chart = features[["Close", "SMA_Short", "SMA_Long"]].copy()
 
-st.line_chart(price_chart)
+fig_price = go.Figure()
+fig_price.add_trace(go.Scatter(
+    x=price_chart.index.tolist(),
+    y=price_chart["Close"].tolist(),
+    mode="lines",
+    name="Close",
+    line=dict(color="#10b981", width=2)
+))
+fig_price.add_trace(go.Scatter(
+    x=price_chart.index.tolist(),
+    y=price_chart["SMA_Short"].tolist(),
+    mode="lines",
+    name="SMA Short",
+    line=dict(color="#3b82f6", width=1)
+))
+fig_price.add_trace(go.Scatter(
+    x=price_chart.index.tolist(),
+    y=price_chart["SMA_Long"].tolist(),
+    mode="lines",
+    name="SMA Long",
+    line=dict(color="#f59e0b", width=1)
+))
+fig_price.update_layout(title="Price Trend Analysis", xaxis_title="Date", yaxis_title="Price", **plotly_config())
+st.plotly_chart(fig_price, use_container_width=True)
 
 st.divider()
 
@@ -368,11 +391,29 @@ c1, c2 = st.columns(2)
 
 with c1:
     st.subheader("Rolling Volatility")
-    st.line_chart(features["Rolling_Vol"])
+    rolling_vol_series = features["Rolling_Vol"]
+    fig_vol = go.Figure(go.Scatter(
+        x=rolling_vol_series.index.tolist(),
+        y=rolling_vol_series.values.tolist(),
+        mode="lines",
+        name="Rolling Volatility",
+        line=dict(color="#f59e0b", width=2)
+    ))
+    fig_vol.update_layout(title="Rolling Volatility", xaxis_title="Date", yaxis_title="Volatility", **plotly_config())
+    st.plotly_chart(fig_vol, use_container_width=True)
 
 with c2:
     st.subheader("Drawdown")
-    st.line_chart(features["Drawdown"])
+    drawdown_series = features["Drawdown"]
+    fig_dd = go.Figure(go.Scatter(
+        x=drawdown_series.index.tolist(),
+        y=drawdown_series.values.tolist(),
+        mode="lines",
+        name="Drawdown",
+        line=dict(color="#ef4444", width=2)
+    ))
+    fig_dd.update_layout(title="Drawdown", xaxis_title="Date", yaxis_title="Drawdown", **plotly_config())
+    st.plotly_chart(fig_dd, use_container_width=True)
 
 st.divider()
 

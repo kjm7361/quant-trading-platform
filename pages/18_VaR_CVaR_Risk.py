@@ -2,9 +2,9 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import yfinance as yf
-import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 
-from components.layout import setup_page, section, next_step
+from components.layout import setup_page, section, next_step, plotly_config
 
 
 # =============================
@@ -421,34 +421,14 @@ section(
     "Visualize the return distribution and downside loss threshold."
 )
 
-fig1, ax1 = plt.subplots(figsize=(11, 5))
-
-ax1.hist(
-    returns,
-    bins=50,
-    alpha=0.75
-)
-
-ax1.axvline(
-    hist_var,
-    linestyle="--",
-    linewidth=2,
-    label=f"Historical VaR {confidence_level:.0%}"
-)
-
-ax1.axvline(
-    hist_cvar,
-    linestyle="--",
-    linewidth=2,
-    label=f"Historical CVaR {confidence_level:.0%}"
-)
-
-ax1.set_title("Portfolio Return Distribution")
-ax1.set_xlabel("Return")
-ax1.set_ylabel("Frequency")
-ax1.legend()
-
-st.pyplot(fig1)
+fig1 = go.Figure(go.Histogram(x=returns, nbinsx=50, marker_color="#3b82f6", opacity=0.75))
+fig1.add_vline(x=hist_var, line_dash="dash", line_color="#ef4444",
+               annotation_text=f"VaR {confidence_level:.0%}", annotation_position="top right")
+fig1.add_vline(x=hist_cvar, line_dash="dash", line_color="#f59e0b",
+               annotation_text=f"CVaR {confidence_level:.0%}", annotation_position="top left")
+fig1.update_layout(title="Portfolio Return Distribution", xaxis_title="Return",
+                   yaxis_title="Frequency", **plotly_config())
+st.plotly_chart(fig1, use_container_width=True)
 
 st.divider()
 
@@ -464,12 +444,20 @@ section(
 c1, c2 = st.columns(2)
 
 with c1:
-    st.subheader("Equity Curve")
-    st.line_chart(equity)
+    fig_eq = go.Figure(go.Scatter(x=equity.index, y=equity.values, mode="lines",
+                                  line=dict(color="#10b981", width=2), fill="tozeroy",
+                                  fillcolor="rgba(16,185,129,0.07)"))
+    fig_eq.update_layout(title="Equity Curve", xaxis_title="Date", yaxis_title="Portfolio Value",
+                         **plotly_config())
+    st.plotly_chart(fig_eq, use_container_width=True)
 
 with c2:
-    st.subheader("Drawdown Curve")
-    st.line_chart(drawdown)
+    fig_dd = go.Figure(go.Scatter(x=drawdown.index, y=drawdown.values, mode="lines",
+                                  line=dict(color="#ef4444", width=2), fill="tozeroy",
+                                  fillcolor="rgba(239,68,68,0.07)"))
+    fig_dd.update_layout(title="Drawdown Curve", xaxis_title="Date", yaxis_title="Drawdown",
+                         **plotly_config())
+    st.plotly_chart(fig_dd, use_container_width=True)
 
 st.divider()
 

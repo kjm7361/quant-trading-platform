@@ -1,8 +1,10 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
+import numpy as np
+import plotly.graph_objects as go
+import yfinance as yf
 
-from components.layout import setup_page, section, next_step
+from components.layout import setup_page, section, next_step, plotly_config
 
 from execution.sim_broker import init_db
 from execution.sim_performance import load_trades_df, equity_curve_from_trades
@@ -89,9 +91,15 @@ if equity_df is not None and len(equity_df) > 0:
 
     returns_series = equity_series.pct_change().dropna()
 
-    st.session_state["equity_curve"] = equity_series
+    st.session_state["equity_curve"]     = equity_series
     st.session_state["strategy_returns"] = returns_series
-    st.session_state["initial_capital"] = float(stats["starting_cash"])
+    st.session_state["initial_capital"]  = float(stats["starting_cash"])
+
+    try:
+        from session_persist import save_session
+        save_session(equity_series, returns_series, float(stats["starting_cash"]))
+    except Exception:
+        pass
 
 
 # =============================
@@ -141,18 +149,15 @@ st.divider()
 # =============================
 section("Equity Curve", "Simulated account equity over time.")
 
-fig = plt.figure(figsize=(10, 5))
-
-plt.plot(
-    pd.to_datetime(equity_df["date"]),
-    equity_df["equity"]
-)
-
-plt.xlabel("Date")
-plt.ylabel("Equity")
-plt.title("Simulated Equity Curve")
-
-st.pyplot(fig)
+fig = go.Figure(go.Scatter(
+    x=pd.to_datetime(equity_df["date"]).tolist(),
+    y=equity_df["equity"].tolist(),
+    mode="lines",
+    name="Equity",
+    line=dict(color="#10b981", width=2)
+))
+fig.update_layout(title="Simulated Equity Curve", xaxis_title="Date", yaxis_title="Equity", **plotly_config())
+st.plotly_chart(fig, use_container_width=True)
 
 st.divider()
 
@@ -170,18 +175,99 @@ dd_df = pd.DataFrame({
     "drawdown": dd
 })
 
-fig2 = plt.figure(figsize=(10, 5))
+fig2 = go.Figure(go.Scatter(
+    x=pd.to_datetime(dd_df["date"]).tolist(),
+    y=dd_df["drawdown"].tolist(),
+    mode="lines",
+    name="Drawdown",
+    line=dict(color="#ef4444", width=2)
+))
+fig2.update_layout(title="Drawdown Curve", xaxis_title="Date", yaxis_title="Drawdown", **plotly_config())
+st.plotly_chart(fig2, use_container_width=True)
 
-plt.plot(
-    pd.to_datetime(dd_df["date"]),
-    dd_df["drawdown"]
+st.divider()
+
+
+# =============================
+# Cumulative Returns vs SPY
+# =============================
+section("Cumulative Returns vs SPY", "Strategy equity normalised to 1.0 versus SPY buy-and-hold.")
+
+_perf_dates = pd.to_datetime(equity_df["date"])
+_strat_eq = pd.Series(equity_df["equity"].values, index=_perf_dates)
+_strat_norm = _strat_eq / _strat_eq.iloc[0]
+
+
+@st.cache_data(ttl=3600)
+def _fetch_spy_perf(start_str, end_str):
+    try:
+        _raw = yf.download("SPY", start=start_str, end=end_str,
+                           auto_adjust=True, progress=False)
+        if _raw.empty:
+            return pd.Series(dtype=float)
+        _close = _raw["Close"].squeeze().dropna()
+        return ((1 + _close.pct_change().dropna()).cumprod())
+    except Exception:
+        return pd.Series(dtype=float)
+
+
+_spy_raw = _fetch_spy_perf(
+    str(_perf_dates.min().date()),
+    str((_perf_dates.max() + pd.Timedelta(days=1)).date()),
 )
 
-plt.xlabel("Date")
-plt.ylabel("Drawdown")
-plt.title("Drawdown Curve")
+fig_cmp = go.Figure()
+fig_cmp.add_trace(go.Scatter(
+    x=_strat_norm.index, y=_strat_norm.values,
+    mode="lines", name="Strategy",
+    line=dict(color="#10b981", width=2),
+    fill="tozeroy", fillcolor="rgba(16,185,129,0.06)",
+))
+if len(_spy_raw) > 1:
+    _spy_aligned = _spy_raw.reindex(_strat_norm.index, method="ffill").dropna()
+    if len(_spy_aligned) > 0:
+        _spy_norm = _spy_aligned / _spy_aligned.iloc[0]
+        fig_cmp.add_trace(go.Scatter(
+            x=_spy_norm.index, y=_spy_norm.values,
+            mode="lines", name="SPY",
+            line=dict(color="#3b82f6", width=2, dash="dot"),
+        ))
+fig_cmp.update_layout(
+    title="Cumulative Returns: Strategy vs SPY",
+    xaxis_title="Date", yaxis_title="Cumulative Return (base = 1)",
+    **plotly_config(),
+)
+st.plotly_chart(fig_cmp, use_container_width=True)
 
-st.pyplot(fig2)
+st.divider()
+
+
+# =============================
+# Rolling Sharpe
+# =============================
+section("Rolling Sharpe Ratio (21-day)", "21-day trailing Sharpe showing consistency of risk-adjusted returns over time.")
+
+_perf_rets = _strat_eq.pct_change().dropna()
+_roll_sharpe_perf = (
+    _perf_rets.rolling(21).mean() / (_perf_rets.rolling(21).std() + 1e-9)
+) * np.sqrt(252)
+
+fig_rs = go.Figure()
+fig_rs.add_trace(go.Scatter(
+    x=_roll_sharpe_perf.index, y=_roll_sharpe_perf.values,
+    mode="lines", name="Rolling Sharpe (21d)",
+    line=dict(color="#8b5cf6", width=2),
+))
+fig_rs.add_hline(y=0, line_dash="solid", line_color="rgba(100,116,139,0.4)", line_width=1)
+fig_rs.add_hline(y=1, line_dash="dot", line_color="#10b981", line_width=1,
+                 annotation_text="Sharpe = 1", annotation_position="bottom right",
+                 annotation_font_color="#10b981")
+fig_rs.update_layout(
+    title="21-Day Rolling Sharpe Ratio",
+    xaxis_title="Date", yaxis_title="Sharpe Ratio",
+    **plotly_config(),
+)
+st.plotly_chart(fig_rs, use_container_width=True)
 
 st.divider()
 

@@ -2,9 +2,9 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import yfinance as yf
-import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 
-from components.layout import setup_page, section, next_step
+from components.layout import setup_page, section, next_step, plotly_config
 
 
 # =============================
@@ -191,8 +191,32 @@ def summarize_dna(
 strategy_returns = st.session_state.get("strategy_returns", None)
 equity_curve = st.session_state.get("equity_curve", None)
 
-if strategy_returns is None or equity_curve is None or len(equity_curve) == 0:
-    st.warning("No strategy data found. Run the Trading Sim, Backtest, or Performance page first.")
+_has_sim = (
+    strategy_returns is not None
+    and equity_curve is not None
+    and len(equity_curve) >= 5
+)
+
+if not _has_sim:
+    st.info("No simulation data yet. Run **Trading Sim** or **Backtest** to populate portfolio analytics.")
+
+    @st.cache_data(ttl=300)
+    def _dna_fallback_mkt():
+        try:
+            from market.prices import fetch_latest_prices
+            return fetch_latest_prices(["SPY", "QQQ", "IWM", "^VIX"], period="5d", interval="1d")
+        except Exception:
+            return pd.DataFrame()
+
+    from components.layout import section
+    section("Market Overview", "Live benchmark data while waiting for simulation results.")
+    _fb = _dna_fallback_mkt()
+    if not _fb.empty:
+        _fb_cols = st.columns(len(_fb))
+        for _fc, (_tkr, _row) in zip(_fb_cols, _fb.iterrows()):
+            _price_str = f"${_row['price']:,.2f}" if _row["price"] < 1000 else f"${_row['price']:,.0f}"
+            _fc.metric(_tkr, _price_str, f"{_row['pct_change']:+.2f}%")
+    st.page_link("pages/5_Trading_Sim.py", label="→ Go to Trading Sim", icon="💹")
     st.stop()
 
 strategy_returns = pd.Series(strategy_returns).dropna()
@@ -500,19 +524,13 @@ trait_df = pd.DataFrame({
     "Score": trait_scores
 })
 
-fig1, ax1 = plt.subplots(figsize=(10, 4))
-
-ax1.bar(
-    trait_df["Trait"],
-    trait_df["Score"]
-)
-
-ax1.set_ylabel("Score")
-ax1.set_title("Strategy Trait Fingerprint")
-
-plt.xticks(rotation=20)
-
-st.pyplot(fig1)
+fig1 = go.Figure(go.Bar(
+    x=trait_df["Trait"].tolist(),
+    y=trait_df["Score"].tolist(),
+    marker_color="#10b981"
+))
+fig1.update_layout(title="Strategy Trait Fingerprint", xaxis_title="Trait", yaxis_title="Score", **plotly_config())
+st.plotly_chart(fig1, use_container_width=True)
 
 st.divider()
 
@@ -535,9 +553,16 @@ section(
     "Rolling strategy edge relative to the benchmark."
 )
 
-st.line_chart(
-    rolling_alpha.dropna()
-)
+rolling_alpha_clean = rolling_alpha.dropna()
+fig_alpha = go.Figure(go.Scatter(
+    x=rolling_alpha_clean.index.tolist(),
+    y=rolling_alpha_clean.values.tolist(),
+    mode="lines",
+    name="Rolling Alpha",
+    line=dict(color="#10b981", width=2)
+))
+fig_alpha.update_layout(title="Rolling Relative Edge", xaxis_title="Date", yaxis_title="Alpha", **plotly_config())
+st.plotly_chart(fig_alpha, use_container_width=True)
 
 st.divider()
 
@@ -550,19 +575,19 @@ section(
     "Scatter relationship between strategy returns and benchmark returns."
 )
 
-fig2, ax2 = plt.subplots(figsize=(7, 5))
-
-ax2.scatter(
-    market_aligned,
-    strategy_aligned,
-    alpha=0.6
+fig2 = go.Figure(go.Scatter(
+    x=market_aligned.values.tolist(),
+    y=strategy_aligned.values.tolist(),
+    mode="markers",
+    marker=dict(color="#10b981", size=5, opacity=0.5)
+))
+fig2.update_layout(
+    title="Strategy vs Market Returns",
+    xaxis_title=f"{benchmark_symbol} Returns",
+    yaxis_title="Strategy Returns",
+    **plotly_config()
 )
-
-ax2.set_xlabel(f"{benchmark_symbol} Returns")
-ax2.set_ylabel("Strategy Returns")
-ax2.set_title("Strategy vs Market Returns")
-
-st.pyplot(fig2)
+st.plotly_chart(fig2, use_container_width=True)
 
 st.divider()
 
